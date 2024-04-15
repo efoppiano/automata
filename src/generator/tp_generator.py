@@ -14,6 +14,9 @@ class TPGenerator(Generator):
         value = self.random()
         value = (b - a) * value + a
         return int(value)
+    
+    def choice(self, seq: list) -> int:
+        return seq[self.randint(0, len(seq) - 1)]
 
     def poi(self, l: float) -> int:
         # Algorithm taken from https://en.wikipedia.org/wiki/Poisson_distribution#Random_variate_generation
