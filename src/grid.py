@@ -6,7 +6,7 @@ gen = TPGenerator(4*10**7)
 
 Direction = Literal["East", "West"]
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 class Grid(Generic[T]):
     def __init__(self, width: int, length: int):
@@ -39,57 +39,26 @@ class Grid(Generic[T]):
     def length(self):
         return len(self._grid[0])
 
-    def is_forward_fill(self, row: int, col: int, facing: Direction) -> bool:
-        if facing == "East":
-            return self.is_fill(row, col+1)
-        else:
-            return self.is_fill(row, col-1)
-
-    def is_left_fill(self, row: int, col: int, facing: Direction) -> bool:
-        if facing == "East":
-            return self.is_fill(row-1, col)
-        else:
-            return self.is_fill(row+1, col)
-
-    def is_right_fill(self, row: int, col: int, facing: Direction) -> bool:
-        if facing == "East":
-            return self.is_left_fill(row, col, "West")
-        else:
-            return self.is_left_fill(row, col, "East")
-
-    def dist_to_next_value(self, row: int, col: int, facing: Direction) -> Optional[int]:
-        if facing == "East":
-            for i in range(col+1, self.length):
-                if self.is_fill(row, i):
-                    return i-col-1
+    def calc_dist_to_next(self, row: int, col: int) -> Optional[int]:
+        for i in range(col+1, self.length):
+            if self.is_fill(row, i):
+                return i - col - 1
+        return None
+    
+    def calc_dist_to_prev(self, row: int, col: int) -> Optional[int]:
+        for i in range(col-1, -1, -1):
+            if self.is_fill(row, i):
+                return col - i - 1
+        return None
+    
+    def get_prev(self, row: int, col: int) -> Optional[T]:
+        dist = self.calc_dist_to_prev(row, col)
+        if dist is None:
             return None
-        else:
-            for i in range(col-1, 0, -1):
-                if self.is_fill(row, i):
-                    return col-i-1
+        return self.get_value(row, col - dist - 1)
+    
+    def get_next(self, row: int, col: int) -> Optional[T]:
+        dist = self.calc_dist_to_next(row, col)
+        if dist is None:
             return None
-
-    def get_prev_value_left(self, row: int, col: int, facing: Direction) -> Optional[T]:
-        if facing == "East":
-            dist = self.dist_to_next_value(row-1, col, "West")
-            if dist is None:
-                return None
-            return self.get_value(row-1, col-dist-1)
-        else:
-            dist = self.dist_to_next_value(row+1, col, "East")
-            if dist is None:
-                return None
-            return self.get_value(row+1, col+dist+1)
-        
-    def get_prev_value_right(self, row: int, col: int, facing: Direction) -> Optional[T]:
-        if facing == "East":
-            dist = self.dist_to_next_value(row+1, col, "West")
-            if dist is None:
-                return None
-            print(dist)
-            return self.get_value(row+1, col-dist-1)
-        else:
-            dist = self.dist_to_next_value(row-1, col, "East")
-            if dist is None:
-                return None
-            return self.get_value(row-1, col+dist+1)
+        return self.get_value(row, col + dist + 1)
