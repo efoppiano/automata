@@ -8,7 +8,7 @@ from movements import Forward, Still, TurnLeft, TurnRight, NoTurn, TurnMovement
 gen = TPGenerator(4*10**7)
 
 class Pedestrian:
-    def __init__(self, facing: Direction, velocity: int = None):
+    def __init__(self, facing: Direction, velocity: int = None, repr: str = None):
         self._facing = facing
         self._desired_movement = None
 
@@ -17,10 +17,18 @@ class Pedestrian:
         else:
             self._vel = self._generate_velocity()
 
+        if repr is not None:
+            self._repr = repr
+        else:
+            self._repr = gen.choice(["😀", "😁", "🙃", "🤔", "😶", "🙄", "😎"])
+
     @property
     def facing(self) -> Direction:
         return self._facing
     
+    def __repr__(self):
+        return self._repr
+
     def _generate_velocity(self) -> int:
         p = gen.random()
         
