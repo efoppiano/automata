@@ -1,4 +1,4 @@
-from typing import Union, Literal, TypeVar, Generic, Optional
+from typing import Literal, TypeVar, Generic, Optional, Callable, Tuple
 
 from generator.tp_generator import TPGenerator
 
@@ -6,11 +6,19 @@ gen = TPGenerator(4*10**7)
 
 Direction = Literal["East", "West"]
 
+class CellAlreadyFill(Exception):
+    def __init__(self, row: int, col: int):
+        self.row = row
+        self.col = col
+        super().__init__(f"Attempted to fill an already fill cell ({row}, {col})")
+
 T = TypeVar("T")
 
 class Grid(Generic[T]):
     def __init__(self, width: int, length: int):
         self._grid = [[None for i in range(length)] for j in range(width)]
+        self._passed_to_west = 0
+        self._passed_to_east = 0
 
     def is_fill(self, row: int, col: int) -> bool:
         if row < 0 or row >= self.width:
@@ -19,12 +27,47 @@ class Grid(Generic[T]):
             return False
         
         return self._grid[row][col] is not None
+    
+    def pedestrian_passed(self, grid_direction: Direction):
+        if grid_direction == "East":
+            self._passed_to_west += 1
+        else:
+            self._passed_to_east += 1
+    
+    def is_column_full(self, col: int) -> bool:
+        for i in range(self.width):
+            if not self.is_fill(i, col):
+                return False
+        return True
+    
+    def show(self):
+        for i in range(self.width):
+            for j in range(self.length):
+
+                if self.is_fill(i, j):
+                    a = self._grid[i][j]
+                    if a.facing == "East":
+                        print(f"{self._grid[i][j]._repr : ^2}", end="")
+                    else:
+                        print(f"{self._grid[i][j]._repr : ^2}", end="")
+                    
+                    
+                else:
+                    print(f"{'□' : ^3}", end="")
+            print()
+        
 
     def fill(self, row: int, col: int, v: T):
         if self.is_fill(row, col):
-            raise Exception(f"Attempted to fill an already fill cell ({row}, {col})")
+            raise CellAlreadyFill(row, col)
             
         self._grid[row][col] = v
+
+    def clear(self, row: int, col: int):
+        if not self.is_fill(row, col):
+            raise Exception(f"Attempted to clear an empty cell ({row}, {col})")
+        
+        self._grid[row][col] = None
 
     def get_value(self, row: int, col: int) -> T:
         if not self.is_fill(row, col):
@@ -62,3 +105,15 @@ class Grid(Generic[T]):
         if dist is None:
             return None
         return self.get_value(row, col + dist + 1)
+    
+    def apply(self, f: Callable[[T, Tuple[int, int]], None]):
+        for i in range(self.width):
+            for j in range(self.length):
+                if self.is_fill(i, j):
+                    f(self.get_value(i, j), (i, j))
+
+    def apply_rev(self, f: Callable[[T, Tuple[int, int]], None]):
+        for i in range(self.width-1, -1, -1):
+            for j in range(self.length-1, -1, -1):
+                if self.is_fill(i, j):
+                    f(self.get_value(i, j), (i, j))
