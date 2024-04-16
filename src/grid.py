@@ -30,9 +30,9 @@ class Grid(Generic[T]):
     
     def pedestrian_passed(self, grid_direction: Direction):
         if grid_direction == "East":
-            self._passed_to_west += 1
-        else:
             self._passed_to_east += 1
+        else:
+            self._passed_to_west += 1
     
     def is_column_full(self, col: int) -> bool:
         for i in range(self.width):
