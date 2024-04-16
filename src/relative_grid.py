@@ -1,10 +1,12 @@
 from typing import Tuple, TypeVar, Generic, Optional
 
-from grid import Direction, Grid, CellAlreadyFill
+from grid import Grid, CellAlreadyFill
 
 from movements import StraightMovement, TurnMovement, Movement, Still, NoTurn
 
 from generator.tp_generator import TPGenerator
+
+from directions import Direction
 
 T = TypeVar("T")
 
@@ -47,8 +49,8 @@ class RelativeGrid(Generic[T]):
                 return True
 
 
-    def is_fill(self, straight_mov: StraightMovement, turn_mov: TurnMovement) -> bool:
-        row, col = self._get_abs_pos(straight_mov, turn_mov)
+    def is_fill(self, movement: Movement) -> bool:
+        row, col = movement.apply(self._facing, self._center)
         if self._grid.is_fill(row, col):
             facing = self._grid.get_value(row, col).facing
             return facing == self._facing
@@ -60,81 +62,49 @@ class RelativeGrid(Generic[T]):
         elif self._facing == "West":
             return self._center[0] - turn_mov, self._center[1] - straight_mov
         
-    def is_inbounds(self, straight_mov: StraightMovement, turn_mov: TurnMovement) -> bool:
-        row, col = self._get_abs_pos(straight_mov, turn_mov)
+    def is_inbounds(self, movement: Movement) -> bool:
+        row, col = movement.apply(self._facing, self._center)
         return 0 <= row < self._grid.width and 0 <= col < self._grid.length
 
-    def get_prev(self, straight_mov: StraightMovement, turn_mov: TurnMovement) -> Optional[T]:
-        row, col = self._get_abs_pos(straight_mov, turn_mov)
+    def get_prev(self, movement: Movement) -> Optional[T]:
+        row, col = movement.apply(self._facing, self._center)
         if self._facing == "East":
             return self._grid.get_prev(row, col)
         else:
             return self._grid.get_next(row, col)
         
-    def get_next(self, straight_mov: StraightMovement, turn_mov: TurnMovement) -> Optional[T]:
-        row, col = self._get_abs_pos(straight_mov, turn_mov)
+    def get_next(self, movement: Movement) -> Optional[T]:
+        row, col = movement.apply(self._facing, self._center)
         if self._facing == "East":
-            return self._grid.get_next(straight_mov, turn_mov)
+            return self._grid.get_next(row, col)
         else:
-            return self._grid.get_prev(straight_mov, turn_mov)
+            return self._grid.get_prev(row, col)
         
-    def calc_dist_to_next(self, straight_mov: StraightMovement, turn_mov: TurnMovement) -> Optional[int]:
-        row, col = self._get_abs_pos(straight_mov, turn_mov)
+    def calc_dist_to_next(self, movement: Movement) -> Optional[int]:
+        row, col = movement.apply(self._facing, self._center)
         if self._facing == "East":
-            next_val = self._grid.get_next(row, col)
-            if next_val is None:
-                return None
-            if next_val.facing == self._facing:
-                return self._grid.calc_dist_to_next(row, col)
-            
-            dist = self._grid.calc_dist_to_next(row, col)
-            dist_to_next_next = self.calc_dist_to_next(straight_mov + dist + 1, turn_mov)
-            if dist_to_next_next is None:
-                return None
-            return dist + dist_to_next_next
+            return self._grid.calc_dist_to_next(row, col, lambda pedestrian: pedestrian.facing == self._facing)
         else:
-            prev_val = self._grid.get_prev(row, col)
-            if prev_val is None:
-                return None
-            
-            if prev_val.facing == self._facing:
-                return self._grid.calc_dist_to_prev(row, col)
-            
-            dist = self._grid.calc_dist_to_prev(row, col)
-
-            dist_to_prev_prev = self.calc_dist_to_next(straight_mov + dist + 1, turn_mov)
-            
-
-            if dist_to_prev_prev is None:
-                return None
-            return dist + dist_to_prev_prev
+            return self._grid.calc_dist_to_prev(row, col, lambda pedestrian: pedestrian.facing == self._facing)
 
     def move(self, movement: Movement):
-        if movement == Still() or movement == NoTurn():
+        if movement == Still():
             return
         
-        if isinstance(movement, StraightMovement):
-            straight_mov = movement
-            turn_mov = NoTurn()
-        
-        if isinstance(movement, TurnMovement):
-            straight_mov = movement
-            turn_mov = movement
-        
-        if not self.is_fill(Still(), NoTurn()):
+        if not self.is_fill(Still()):
             raise Exception("Attempted to move an empty cell")
         
-        if not self.is_inbounds(straight_mov, turn_mov):
+        if not self.is_inbounds(movement):
             self._grid.pedestrian_passed(self._facing)
             self._grid.clear(self._center[0], self._center[1])
             return
 
         
-        if self.is_fill(straight_mov, turn_mov):
-            raise CellAlreadyFill(*self._get_abs_pos(straight_mov, turn_mov))
+        if self.is_fill(movement):
+            raise CellAlreadyFill(*movement.apply(self._facing, self._center))
         
         me = self._grid.get_value(self._center[0], self._center[1])
-        row, col = self._get_abs_pos(straight_mov, turn_mov)
+        row, col = movement.apply(self._facing, self._center)
         try:
             self._grid.fill(row, col, me)
         except CellAlreadyFill:

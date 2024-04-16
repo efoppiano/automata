@@ -45,41 +45,41 @@ class Pedestrian:
             return 2
 
     def can_move_forward(self, rel_grid: RelativeGrid) -> bool:
-        return not rel_grid.is_fill(Forward(1), NoTurn())
+        return not rel_grid.is_fill(Forward(1))
     
     def can_move_left(self, rel_grid: RelativeGrid) -> bool:
-        if not rel_grid.is_inbounds(Still(), TurnLeft(1)):
+        if not rel_grid.is_inbounds(TurnLeft(1)):
             return False
         
-        if rel_grid.is_fill(Still(), TurnLeft(1)):
+        if rel_grid.is_fill(TurnLeft(1)):
             return False
         
-        prev = rel_grid.get_prev(Still(), TurnLeft(1))
+        prev = rel_grid.get_prev(TurnLeft(1))
         if prev is not None and self.facing == prev.facing and not self.is_faster_than(prev):
             return False
         
-        dist_to_next = rel_grid.calc_dist_to_next(Still(), TurnLeft(1))
+        dist_to_next = rel_grid.calc_dist_to_next(TurnLeft(1))
         return dist_to_next is None or dist_to_next > self._vel
     
     def can_move_right(self, rel_grid: RelativeGrid) -> bool:
-        if not rel_grid.is_inbounds(Still(), TurnRight(1)):
+        if not rel_grid.is_inbounds(TurnRight(1)):
             return False
         
-        if rel_grid.is_fill(Still(), TurnRight(1)):
+        if rel_grid.is_fill(TurnRight(1)):
             return False
         
-        prev = rel_grid.get_prev(Still(), TurnRight(1))
+        prev = rel_grid.get_prev(TurnRight(1))
         if prev is not None and self.facing == prev.facing and not self.is_faster_than(prev):
             return False
         
-        dist_to_next = rel_grid.calc_dist_to_next(Still(), TurnRight(1))
+        dist_to_next = rel_grid.calc_dist_to_next(TurnRight(1))
         return dist_to_next is None or dist_to_next > self._vel
     
     def is_faster_than(self, other: 'Pedestrian') -> bool:
         return self._vel > other._vel
     
     def _get_pos_forward(self, rel_grid: RelativeGrid) -> Forward:
-        dist_to_next = rel_grid.calc_dist_to_next(Still(), NoTurn())
+        dist_to_next = rel_grid.calc_dist_to_next(Still())
         if dist_to_next is None or dist_to_next > self._vel:
             return Forward(self._vel)
         return Forward(dist_to_next)

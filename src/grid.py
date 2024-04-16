@@ -1,10 +1,9 @@
-from typing import Literal, TypeVar, Generic, Optional, Callable, Tuple
+from typing import TypeVar, Generic, Optional, Callable, Tuple
 
 from generator.tp_generator import TPGenerator
+from directions import Direction
 
 gen = TPGenerator(4*10**7)
-
-Direction = Literal["East", "West"]
 
 class CellAlreadyFill(Exception):
     def __init__(self, row: int, col: int):
@@ -28,6 +27,7 @@ class Grid(Generic[T]):
         
         return self._grid[row][col] is not None
     
+    # Testing only: Grid should not be aware of directions
     def pedestrian_passed(self, grid_direction: Direction):
         if grid_direction == "East":
             self._passed_to_east += 1
@@ -82,26 +82,32 @@ class Grid(Generic[T]):
     def length(self):
         return len(self._grid[0])
 
-    def calc_dist_to_next(self, row: int, col: int) -> Optional[int]:
+    def calc_dist_to_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
+        if f is None:
+            f = lambda x: True
+
         for i in range(col+1, self.length):
-            if self.is_fill(row, i):
+            if self.is_fill(row, i) and f(self.get_value(row, i)):
                 return i - col - 1
         return None
     
-    def calc_dist_to_prev(self, row: int, col: int) -> Optional[int]:
+    def calc_dist_to_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
+        if f is None:
+            f = lambda x: True
+
         for i in range(col-1, -1, -1):
-            if self.is_fill(row, i):
+            if self.is_fill(row, i) and f(self.get_value(row, i)):
                 return col - i - 1
         return None
     
-    def get_prev(self, row: int, col: int) -> Optional[T]:
-        dist = self.calc_dist_to_prev(row, col)
+    def get_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
+        dist = self.calc_dist_to_prev(row, col, f)
         if dist is None:
             return None
         return self.get_value(row, col - dist - 1)
     
-    def get_next(self, row: int, col: int) -> Optional[T]:
-        dist = self.calc_dist_to_next(row, col)
+    def get_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
+        dist = self.calc_dist_to_next(row, col, f)
         if dist is None:
             return None
         return self.get_value(row, col + dist + 1)

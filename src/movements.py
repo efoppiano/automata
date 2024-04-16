@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import Tuple
+
+from directions import Direction
 
 class Movement(ABC):
     @abstractmethod
@@ -22,10 +25,13 @@ class Movement(ABC):
 
     def __rsub__(self, other) -> int:
         return -(-other + self)
-
     
     @abstractmethod
     def __repr__(self) -> str:
+        pass
+
+    @abstractmethod
+    def apply(self, facing: Direction, center: Tuple[int, int]) -> Tuple[int, int]:
         pass
 
 class StraightMovement(Movement):
@@ -34,6 +40,11 @@ class StraightMovement(Movement):
 class Forward(StraightMovement):
     def __init__(self, amount: int):
         self._amount = amount
+
+    def apply(self, facing: Direction, center: Tuple[int, int]) -> Tuple[int, int]:
+        if facing == "East":
+            return center[0], center[1] + self._amount
+        return center[0], center[1] - self._amount
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self._amount})"
@@ -59,6 +70,11 @@ class Backward(StraightMovement):
     def __init__(self, amount: int):
         self._amount = amount
 
+    def apply(self, facing: Direction, center: Tuple[int, int]) -> Tuple[int, int]:
+        if facing == "East":
+            return center[0], center[1] - self._amount
+        return center[0], center[1] + self._amount
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self._amount})"
 
@@ -80,6 +96,9 @@ class Backward(StraightMovement):
         return other.__class__.__name__ == "Backward" and self._amount == other._amount
     
 class Still(StraightMovement):
+    def apply(self, facing: Direction, center: Tuple[int, int]) -> Tuple[int, int]:
+        return center
+    
     def __repr__(self) -> str:
         return self.__class__.__name__
     
@@ -106,6 +125,11 @@ class TurnLeft(TurnMovement):
     def __init__(self, amount: int):
         self._amount = amount
 
+    def apply(self, facing: Direction, center: Tuple[int, int]) -> Tuple[int, int]:
+        if facing == "East":
+            return center[0] - self._amount, center[1]
+        return center[0] + self._amount, center[1]
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self._amount})"
 
@@ -130,6 +154,11 @@ class TurnRight(TurnMovement):
     def __init__(self, amount: int):
         self._amount = amount
 
+    def apply(self, facing: Direction, center: Tuple[int, int]) -> Tuple[int, int]:
+        if facing == "East":
+            return center[0] + self._amount, center[1]
+        return center[0] - self._amount, center[1]
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self._amount})"
 
@@ -151,6 +180,9 @@ class TurnRight(TurnMovement):
         return other.__class__.__name__ == "TurnRight" and self._amount == other._amount
     
 class NoTurn(TurnMovement):
+    def apply(self, _: Direction, center: Tuple[int, int]) -> Tuple[int, int]:
+        return center
+    
     def __repr__(self) -> str:
         return self.__class__.__name__
     
