@@ -22,10 +22,7 @@ class Automata:
         self._pedestrian_sem.update()
         self._waiting_area_east.update()
         self._waiting_area_west.update()
-        if gen.random() > 0.5:
-            self._grid.apply(lambda pedestrian, pos: pedestrian.think(RelativeGrid(pos, pedestrian.facing, self._grid), self._pedestrian_sem))
-        else:
-            self._grid.apply_rev(lambda pedestrian, pos: pedestrian.think(RelativeGrid(pos, pedestrian.facing, self._grid), self._pedestrian_sem))
+        self._grid.apply(lambda pedestrian, pos: pedestrian.think(RelativeGrid(pos, pedestrian.facing, self._grid), self._pedestrian_sem))
         
         self._grid.apply(self.move_pedestrian)
         self._moved_pedestrians.clear()

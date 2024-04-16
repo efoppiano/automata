@@ -107,13 +107,11 @@ class Grid(Generic[T]):
         return self.get_value(row, col + dist + 1)
     
     def apply(self, f: Callable[[T, Tuple[int, int]], None]):
-        for i in range(self.width):
-            for j in range(self.length):
-                if self.is_fill(i, j):
-                    f(self.get_value(i, j), (i, j))
+        remaining_cells = [(i, j) for i in range(self.width) for j in range(self.length)]
 
-    def apply_rev(self, f: Callable[[T, Tuple[int, int]], None]):
-        for i in range(self.width-1, -1, -1):
-            for j in range(self.length-1, -1, -1):
-                if self.is_fill(i, j):
-                    f(self.get_value(i, j), (i, j))
+        while len(remaining_cells) > 0:
+            cell = gen.choice(remaining_cells)
+            remaining_cells.remove(cell)
+            i, j = cell
+            if self.is_fill(i, j):
+                f(self.get_value(i, j), (i, j))
