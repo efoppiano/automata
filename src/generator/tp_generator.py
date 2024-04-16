@@ -15,7 +15,7 @@ class TPGenerator(Generator):
         value = (b - a) * value + a
         return int(value)
     
-    def choice(self, seq: list) -> int:
+    def choice(self, seq: list):
         return seq[self.randint(0, len(seq) - 1)]
 
     def poi(self, l: float) -> int:
