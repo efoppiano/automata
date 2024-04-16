@@ -22,16 +22,16 @@ class Automata:
         self._pedestrian_sem.update()
         self._waiting_area_east.update()
         self._waiting_area_west.update()
-        self._grid.apply(lambda pedestrian, pos: pedestrian.think(RelativeGrid(pos, pedestrian.facing, self._grid), self._pedestrian_sem))
+        self._grid.apply(lambda pedestrian, _: pedestrian.think(self._pedestrian_sem))
         
         self._grid.apply(self.move_pedestrian)
         self._moved_pedestrians.clear()
 
-    def move_pedestrian(self, pedestrian: Pedestrian, center: Tuple[int, int]):
+    def move_pedestrian(self, pedestrian: Pedestrian, _: Tuple[int, int]):
         if pedestrian in self._moved_pedestrians:
             return
         try:
-            RelativeGrid(center, pedestrian.facing, self._grid).move(pedestrian._desired_movement)
+            pedestrian.move()
         except CellAlreadyFill:
             pass
         self._moved_pedestrians.add(pedestrian)

@@ -11,9 +11,9 @@ from orientable import Orientable
 gen = TPGenerator(4*10**7)
 
 class Pedestrian(Orientable):
-    def __init__(self, facing: Direction, velocity: int = None, repr: str = None):
-        self._facing = facing
+    def __init__(self, rel_grid: RelativeGrid, velocity: int = None, repr: str = None):
         self._desired_movement = None
+        self._rel_grid = rel_grid
 
         if velocity is not None:
             self._vel = velocity
@@ -27,7 +27,7 @@ class Pedestrian(Orientable):
 
     @property
     def facing(self) -> Direction:
-        return self._facing
+        return self._rel_grid.facing
     
     def __repr__(self):
         return self._repr
@@ -46,42 +46,42 @@ class Pedestrian(Orientable):
         else:
             return 2
 
-    def can_move_forward(self, rel_grid: RelativeGrid) -> bool:
-        return not rel_grid.is_fill(Forward(1))
+    def can_move_forward(self) -> bool:
+        return not self._rel_grid.is_fill(Forward(1))
     
-    def can_move_left(self, rel_grid: RelativeGrid) -> bool:
-        if not rel_grid.is_inbounds(TurnLeft(1)):
+    def can_move_left(self) -> bool:
+        if not self._rel_grid.is_inbounds(TurnLeft(1)):
             return False
         
-        if rel_grid.is_fill(TurnLeft(1)):
+        if self._rel_grid.is_fill(TurnLeft(1)):
             return False
         
-        prev = rel_grid.get_prev(TurnLeft(1))
+        prev = self._rel_grid.get_prev(TurnLeft(1))
         if prev is not None and self.facing == prev.facing and not self.is_faster_than(prev):
             return False
         
-        dist_to_next = rel_grid.calc_dist_to_next(TurnLeft(1))
+        dist_to_next = self._rel_grid.calc_dist_to_next(TurnLeft(1))
         return dist_to_next is None or dist_to_next > self._vel
     
-    def can_move_right(self, rel_grid: RelativeGrid) -> bool:
-        if not rel_grid.is_inbounds(TurnRight(1)):
+    def can_move_right(self) -> bool:
+        if not self._rel_grid.is_inbounds(TurnRight(1)):
             return False
         
-        if rel_grid.is_fill(TurnRight(1)):
+        if self._rel_grid.is_fill(TurnRight(1)):
             return False
         
-        prev = rel_grid.get_prev(TurnRight(1))
+        prev = self._rel_grid.get_prev(TurnRight(1))
         if prev is not None and self.facing == prev.facing and not self.is_faster_than(prev):
             return False
         
-        dist_to_next = rel_grid.calc_dist_to_next(TurnRight(1))
+        dist_to_next = self._rel_grid.calc_dist_to_next(TurnRight(1))
         return dist_to_next is None or dist_to_next > self._vel
     
     def is_faster_than(self, other: 'Pedestrian') -> bool:
         return self._vel > other._vel
     
-    def _get_pos_forward(self, rel_grid: RelativeGrid) -> Forward:
-        dist_to_next = rel_grid.calc_dist_to_next(Still())
+    def _get_pos_forward(self) -> Forward:
+        dist_to_next = self._rel_grid.calc_dist_to_next(Still())
         if dist_to_next is None or dist_to_next > self._vel:
             return Forward(self._vel)
         return Forward(dist_to_next)
@@ -93,16 +93,16 @@ class Pedestrian(Orientable):
         else:
             return TurnRight(1)
 
-    def think(self, rel_grid: RelativeGrid, pedestrian_sem: Semaphore = None):
+    def think(self, pedestrian_sem: Semaphore = None):
         if pedestrian_sem is not None and pedestrian_sem.state == "red":
             self._vel = 6
             self._repr = "😰"
 
-        if self.can_move_forward(rel_grid):
-            self._desired_movement = self._get_pos_forward(rel_grid)
+        if self.can_move_forward():
+            self._desired_movement = self._get_pos_forward()
         else:
-            can_move_left = self.can_move_left(rel_grid)
-            can_move_right = self.can_move_right(rel_grid)
+            can_move_left = self.can_move_left()
+            can_move_right = self.can_move_right()
             
             if can_move_left and not can_move_right:
                 self._desired_movement = TurnLeft(1)
@@ -113,4 +113,5 @@ class Pedestrian(Orientable):
             else:
                 self._desired_movement = Still()
 
-                
+    def move(self):
+        self._rel_grid.move(self._desired_movement)

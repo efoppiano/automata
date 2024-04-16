@@ -1,4 +1,4 @@
-from typing import Tuple, TypeVar, Generic, Optional
+from typing import Tuple, TypeVar, Generic, Optional, Callable
 
 from grid import Grid, CellAlreadyFill
 
@@ -6,7 +6,7 @@ from movements import StraightMovement, TurnMovement, Movement, Still, NoTurn
 
 from generator.tp_generator import TPGenerator
 
-from directions import Direction
+from directions import Direction, opposite_direction
 
 from orientable import Orientable
 
@@ -24,29 +24,31 @@ class RelativeGrid(Generic[T]):
     def facing(self) -> Direction:
         return self._facing
     
-    def spawn(self, obj: T) -> bool:
+    def spawn(self, f: Callable[['RelativeGrid'], T]) -> bool:
         if self.facing == "East":
-            return self._spawn_facing_east(obj)
+            return self._spawn_facing_east(f)
         else:
-            return self._spawn_facing_west(obj)
+            return self._spawn_facing_west(f)
 
-    def _spawn_facing_east(self, obj: T) -> bool:
+    def _spawn_facing_east(self, f: Callable[['RelativeGrid'], T]) -> bool:
         if self._grid.is_column_full(0):
             return False
 
         while True:
             possible_pos = gen.randint(0, self._grid.width)
             if not self._grid.is_fill(possible_pos, 0):
+                obj = f(RelativeGrid((possible_pos, 0), self._facing, self._grid))
                 self._grid.fill(possible_pos, 0, obj)
                 return True
             
-    def _spawn_facing_west(self, obj: T) -> bool:
+    def _spawn_facing_west(self, f: Callable[['RelativeGrid'], T]) -> bool:
         if self._grid.is_column_full(self._grid.length-1):
             return False
 
         while True:
             possible_pos = gen.randint(0, self._grid.width)
             if not self._grid.is_fill(possible_pos, self._grid.length-1):
+                obj = f(RelativeGrid((possible_pos, self._grid.length-1), self._facing, self._grid))
                 self._grid.fill(possible_pos, self._grid.length-1, obj)
                 return True
 
@@ -55,7 +57,9 @@ class RelativeGrid(Generic[T]):
         row, col = movement.apply(self._facing, self._center)
         if self._grid.is_fill(row, col):
             facing = self._grid.get_value(row, col).facing
-            return facing == self._facing
+            if self._facing == opposite_direction(facing):
+                return False
+            return True            
         return False
     
     def is_inbounds(self, movement: Movement) -> bool:
@@ -107,3 +111,4 @@ class RelativeGrid(Generic[T]):
             return self.move(movement - 1)
 
         self._grid.clear(self._center[0], self._center[1])
+        self._center = (row, col)
