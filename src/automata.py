@@ -41,5 +41,8 @@ class Automata:
 
     def show(self):
         self._pedestrian_sem.show()
+        print("Waiting at East:", self._waiting_area_east)
+        print("Waiting at West:", self._waiting_area_west)
+        
         self._grid.show()
 
