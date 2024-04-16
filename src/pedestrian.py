@@ -4,6 +4,7 @@ from grid import Direction
 from relative_grid import RelativeGrid
 from generator.tp_generator import TPGenerator
 from movements import Forward, Still, TurnLeft, TurnRight, NoTurn, TurnMovement
+from semaphore import Semaphore
 
 gen = TPGenerator(4*10**7)
 
@@ -90,7 +91,11 @@ class Pedestrian:
         else:
             return TurnRight(1)
 
-    def think(self, rel_grid: RelativeGrid):
+    def think(self, rel_grid: RelativeGrid, pedestrian_sem: Semaphore = None):
+        if pedestrian_sem is not None and pedestrian_sem.state == "red":
+            self._vel = 6
+            self._repr = "😰"
+
         if self.can_move_forward(rel_grid):
             self._desired_movement = self._get_pos_forward(rel_grid)
         else:

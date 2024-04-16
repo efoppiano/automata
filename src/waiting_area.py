@@ -2,17 +2,19 @@ from typing import TypeVar, Generic
 
 from pedestrian import Pedestrian
 from generator.tp_generator import TPGenerator
+from semaphore import Semaphore
 
 gen = TPGenerator(2**10**7)
 
 T = TypeVar("T")
 
 class WaitingArea(Generic[T]):
-    def __init__(self, arrival_rate: float, rel_grid: T):
+    def __init__(self, arrival_rate: float, rel_grid: T, pedestrian_sem: Semaphore):
         self._rel_grid = rel_grid
         self._waiting_pedestrians = 0
         self._arrival_rate = arrival_rate
         self._total_generated_pedestrians = 0
+        self._pedestrian_sem = pedestrian_sem
 
     def _generate_pedestrians(self):
         new_pedestrians = gen.poi(self._arrival_rate)
@@ -28,4 +30,5 @@ class WaitingArea(Generic[T]):
 
     def update(self):
         self._generate_pedestrians()
-        self._move_pedestrians()
+        if self._pedestrian_sem.state == "green":
+            self._move_pedestrians()
