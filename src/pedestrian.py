@@ -6,9 +6,11 @@ from generator.tp_generator import TPGenerator
 from movements import Forward, Still, TurnLeft, TurnRight, NoTurn, TurnMovement
 from semaphore import Semaphore
 
+from orientable import Orientable
+
 gen = TPGenerator(4*10**7)
 
-class Pedestrian:
+class Pedestrian(Orientable):
     def __init__(self, facing: Direction, velocity: int = None, repr: str = None):
         self._facing = facing
         self._desired_movement = None

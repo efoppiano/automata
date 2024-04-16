@@ -8,7 +8,9 @@ from generator.tp_generator import TPGenerator
 
 from directions import Direction
 
-T = TypeVar("T")
+from orientable import Orientable
+
+T = TypeVar("T", bound=Orientable)
 
 gen = TPGenerator(3**10**7)
 
@@ -83,9 +85,9 @@ class RelativeGrid(Generic[T]):
     def calc_dist_to_next(self, movement: Movement) -> Optional[int]:
         row, col = movement.apply(self._facing, self._center)
         if self._facing == "East":
-            return self._grid.calc_dist_to_next(row, col, lambda pedestrian: pedestrian.facing == self._facing)
+            return self._grid.calc_dist_to_next(row, col, lambda elem: elem.facing == self._facing)
         else:
-            return self._grid.calc_dist_to_prev(row, col, lambda pedestrian: pedestrian.facing == self._facing)
+            return self._grid.calc_dist_to_prev(row, col, lambda elem: elem.facing == self._facing)
 
     def move(self, movement: Movement):
         if movement == Still():
