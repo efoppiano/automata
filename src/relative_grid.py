@@ -58,12 +58,6 @@ class RelativeGrid(Generic[T]):
             return facing == self._facing
         return False
     
-    def _get_abs_pos(self, straight_mov: StraightMovement, turn_mov: TurnMovement) -> Tuple[int, int]:
-        if self._facing == "East":
-            return self._center[0] + turn_mov, self._center[1] + straight_mov
-        elif self._facing == "West":
-            return self._center[0] - turn_mov, self._center[1] - straight_mov
-        
     def is_inbounds(self, movement: Movement) -> bool:
         row, col = movement.apply(self._facing, self._center)
         return 0 <= row < self._grid.width and 0 <= col < self._grid.length
