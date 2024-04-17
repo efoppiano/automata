@@ -38,7 +38,7 @@ class RelativeGrid(Generic[T]):
     
     def fill(self, displacement: RelativePosition, obj: T):
         if not self.is_inbounds(displacement):
-            raise Exception(f"Attempted to fill an out of bounds cell {displacement.apply(self._facing, self._center)}")
+            raise Exception(f"Attempted to fill an out of bounds cell {displacement.apply(self._facing, self._center)} - Bounds: {self._bounds}")
 
         row, col = displacement.apply(self.facing, self._center)
         self._grid.fill(row, col, obj)
@@ -65,22 +65,35 @@ class RelativeGrid(Generic[T]):
         row, col = displacement.apply(self._facing, self._center)
         if self._facing == "East":
             return self._grid.get_prev(row, col)
-        else:
+        elif self._facing == "West":
             return self._grid.get_next(row, col)
+        elif self._facing == "North":
+            return self._grid.get_vertically_next(row, col)
+        elif self._facing == "South":
+            return self._grid.get_vertically_prev(row, col)
         
     def get_next(self, displacement: RelativePosition) -> Optional[T]:
         row, col = displacement.apply(self._facing, self._center)
         if self._facing == "East":
             return self._grid.get_next(row, col)
-        else:
+        elif self._facing == "West":
             return self._grid.get_prev(row, col)
+        elif self._facing == "North":
+            return self._grid.get_vertically_prev(row, col)
+        elif self._facing == "South":
+            return self._grid.get_vertically_next(row, col)
+        
         
     def calc_dist_to_next(self, displacement: RelativePosition) -> Optional[int]:
         row, col = displacement.apply(self._facing, self._center)
         if self._facing == "East":
             return self._grid.calc_dist_to_next(row, col, lambda elem: elem.facing == self._facing)
-        else:
+        elif self._facing == "West":
             return self._grid.calc_dist_to_prev(row, col, lambda elem: elem.facing == self._facing)
+        elif self._facing == "North":
+            return self._grid.calc_dist_to_vertically_prev(row, col, lambda elem: elem.facing == self._facing)
+        elif self._facing == "South":
+            return self._grid.calc_dist_to_vertically_next(row, col, lambda elem: elem.facing == self._facing)
 
     def move(self, displacement: RelativePosition):
         if displacement.is_still():

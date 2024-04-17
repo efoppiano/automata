@@ -44,15 +44,21 @@ class Grid(Generic[T]):
         return True
     
     def show(self):
-        for i in range(self.width):
-            for j in range(self.length):
+        print(f"{'': ^3}", end="")
+        for i in range(self.length):
+            print(f"{i: ^3}", end="")
+        print()
 
+        for i in range(self.width):
+            print(f"{i: ^3}", end="")
+            for j in range(self.length):
                 if self.is_fill(i, j):
-                    a = self._grid[i][j]
-                    if a.facing == "East":
-                        print(f"{self._grid[i][j]._repr}>", end="")
-                    else:
-                        print(f"<{self._grid[i][j]._repr}", end="")
+                    print(f"{self._grid[i][j] : ^3}", end="")
+                    # a = self._grid[i][j]
+                    # if a.facing == "East":
+                    #     print(f"{self._grid[i][j]._repr}>", end="")
+                    # else:
+                    #    print(f"<{self._grid[i][j]._repr}", end="")
                 else:
                     print(f"{'□' : ^3}", end="")
             print()
@@ -101,17 +107,49 @@ class Grid(Generic[T]):
                 return col - i - 1
         return None
     
+    def calc_dist_to_vertically_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
+        if f is None:
+            f = lambda x: True
+
+        for i in range(row+1, self.width):
+            if self.is_fill(i, col) and f(self.get_value(i, col)):
+                return i - row - 1
+        return None
+    
+    def calc_dist_to_vertically_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
+        if f is None:
+            f = lambda x: True
+
+        for i in range(row-1, -1, -1):
+            if self.is_fill(i, col) and f(self.get_value(i, col)):
+                return row - i - 1
+        return None
+
+
+    
     def get_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
         dist = self.calc_dist_to_prev(row, col, f)
         if dist is None:
             return None
         return self.get_value(row, col - dist - 1)
     
+    def get_vertically_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
+        dist = self.calc_dist_to_vertically_prev(row, col, f)
+        if dist is None:
+            return None
+        return self.get_value(row - dist - 1, col)
+    
     def get_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
         dist = self.calc_dist_to_next(row, col, f)
         if dist is None:
             return None
         return self.get_value(row, col + dist + 1)
+    
+    def get_vertically_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
+        dist = self.calc_dist_to_vertically_next(row, col, f)
+        if dist is None:
+            return None
+        return self.get_value(row + dist + 1, col)
     
     def apply(self, f: Callable[[T, Tuple[int, int]], None]):
         remaining_cells = [(i, j) for i in range(self.width) for j in range(self.length)]
