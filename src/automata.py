@@ -57,12 +57,12 @@ class Automata:
         waiting_area_length = waiting_area_prototype.length
 
         self._car_lanes = []
-        for i in range(car_lanes_amount//2):
+        for i in range(car_lanes_amount//2, car_lanes_amount):
             car_lane_zone = car_lane_zone_prototype.duplicate()
             car_lane_zone.move_right(waiting_area_length + i*car_lane_zone_prototype.length)
             grid_car_lane = RelativeGrid(car_lane_zone.lower_left, car_lane_zone, "North", self._grid)
             self._car_lanes.append(VehicleLane(500/3600, car_prototype.length, car_prototype.width, self._pedestrian_sem, grid_car_lane))
-        for i in range(car_lanes_amount//2, car_lanes_amount):
+        for i in range(car_lanes_amount//2):
             car_lane_zone = car_lane_zone_prototype.duplicate()
             car_lane_zone.move_right(waiting_area_length + i*car_lane_zone_prototype.length)
             grid_car_lane = RelativeGrid(car_lane_zone.upper_right, car_lane_zone, "South", self._grid)
