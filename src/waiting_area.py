@@ -4,6 +4,7 @@ from pedestrian import Pedestrian
 from generator.tp_generator import TPGenerator
 from semaphore import Semaphore
 from relative_grid import RelativeGrid
+from relative_position import RelativePosition
 
 gen = TPGenerator(2**10**7)
 
@@ -26,11 +27,27 @@ class WaitingArea:
         self._total_generated_pedestrians += new_pedestrians
 
 
+    def _can_place_pedestrian(self) -> bool:
+        width = self._rel_grid.width
+        for i in range(width):
+            if not self._rel_grid.is_fill(RelativePosition.right(i), ignore_opposite_direction=False):
+                return True
+        return False
+    
+    def _place_pedestrian(self):
+        width = self._rel_grid.width
+        
+        possible_pos = gen.randint(0, width)
+        while self._rel_grid.is_fill(RelativePosition.right(possible_pos), ignore_opposite_direction=False):
+            possible_pos = (possible_pos + 1) % width
+
+        pedestrian_grid = self._rel_grid.new_displaced(RelativePosition.right(possible_pos))
+        self._rel_grid.fill(RelativePosition.right(possible_pos), Pedestrian(pedestrian_grid))
+        self._waiting_pedestrians -= 1
+    
     def _place_pedestrians(self):
-        while self._waiting_pedestrians > 0:
-            if not self._rel_grid.spawn(lambda ped_rel_grid: Pedestrian(ped_rel_grid)):
-                break
-            self._waiting_pedestrians -= 1
+        while self._waiting_pedestrians > 0 and self._can_place_pedestrian():
+            self._place_pedestrian()
 
     def update(self):
         self._generate_pedestrians()

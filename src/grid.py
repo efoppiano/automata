@@ -6,10 +6,13 @@ from directions import Direction
 gen = TPGenerator(4*10**7)
 
 class CellAlreadyFill(Exception):
-    def __init__(self, row: int, col: int):
+    def __init__(self, row: int, col: int, v = None):
         self.row = row
         self.col = col
-        super().__init__(f"Attempted to fill an already fill cell ({row}, {col})")
+        if v is not None:
+            super().__init__(f"Attempted to fill an already fill cell ({row}, {col}) containing {v}")
+        else:
+            super().__init__(f"Attempted to fill an already fill cell ({row}, {col})")
 
 T = TypeVar("T")
 
@@ -47,11 +50,9 @@ class Grid(Generic[T]):
                 if self.is_fill(i, j):
                     a = self._grid[i][j]
                     if a.facing == "East":
-                        print(f"{self._grid[i][j]._repr : ^2}", end="")
+                        print(f"{self._grid[i][j]._repr}>", end="")
                     else:
-                        print(f"{self._grid[i][j]._repr : ^2}", end="")
-                    
-                    
+                        print(f"<{self._grid[i][j]._repr}", end="")
                 else:
                     print(f"{'□' : ^3}", end="")
             print()
@@ -59,7 +60,7 @@ class Grid(Generic[T]):
 
     def fill(self, row: int, col: int, v: T):
         if self.is_fill(row, col):
-            raise CellAlreadyFill(row, col)
+            raise CellAlreadyFill(row, col, self._grid[row][col])
             
         self._grid[row][col] = v
 

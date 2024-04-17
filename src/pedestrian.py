@@ -1,9 +1,9 @@
-from typing import Tuple
+from typing import Union
 
 from grid import Direction
 from relative_grid import RelativeGrid
 from generator.tp_generator import TPGenerator
-from movements import Forward, Still, TurnLeft, TurnRight, NoTurn, TurnMovement
+from relative_position import RelativePosition
 from semaphore import Semaphore
 
 from orientable import Orientable
@@ -12,7 +12,7 @@ gen = TPGenerator(4*10**7)
 
 class Pedestrian(Orientable):
     def __init__(self, rel_grid: RelativeGrid, velocity: int = None, repr: str = None):
-        self._desired_movement = None
+        self._desired_displacement = None
         self._rel_grid = rel_grid
 
         if velocity is not None:
@@ -47,51 +47,51 @@ class Pedestrian(Orientable):
             return 2
 
     def can_move_forward(self) -> bool:
-        return not self._rel_grid.is_fill(Forward(1))
+        return not self._rel_grid.is_fill(RelativePosition.forward(1))
     
     def can_move_left(self) -> bool:
-        if not self._rel_grid.is_inbounds(TurnLeft(1)):
+        if not self._rel_grid.is_inbounds(RelativePosition.left(1)):
             return False
         
-        if self._rel_grid.is_fill(TurnLeft(1)):
+        if self._rel_grid.is_fill(RelativePosition.left(1)):
             return False
         
-        prev = self._rel_grid.get_prev(TurnLeft(1))
+        prev = self._rel_grid.get_prev(RelativePosition.left(1))
         if prev is not None and self.facing == prev.facing and not self.is_faster_than(prev):
             return False
         
-        dist_to_next = self._rel_grid.calc_dist_to_next(TurnLeft(1))
+        dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.left(1))
         return dist_to_next is None or dist_to_next > self._vel
     
     def can_move_right(self) -> bool:
-        if not self._rel_grid.is_inbounds(TurnRight(1)):
+        if not self._rel_grid.is_inbounds(RelativePosition.right(1)):
             return False
         
-        if self._rel_grid.is_fill(TurnRight(1)):
+        if self._rel_grid.is_fill(RelativePosition.right(1)):
             return False
         
-        prev = self._rel_grid.get_prev(TurnRight(1))
+        prev = self._rel_grid.get_prev(RelativePosition.right(1))
         if prev is not None and self.facing == prev.facing and not self.is_faster_than(prev):
             return False
         
-        dist_to_next = self._rel_grid.calc_dist_to_next(TurnRight(1))
+        dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.right(1))
         return dist_to_next is None or dist_to_next > self._vel
     
     def is_faster_than(self, other: 'Pedestrian') -> bool:
         return self._vel > other._vel
     
-    def _get_pos_forward(self) -> Forward:
-        dist_to_next = self._rel_grid.calc_dist_to_next(Still())
+    def _get_pos_forward(self) -> RelativePosition:
+        dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.still())
         if dist_to_next is None or dist_to_next > self._vel:
-            return Forward(self._vel)
-        return Forward(dist_to_next)
+            return RelativePosition.forward(self._vel)
+        return RelativePosition.forward(dist_to_next)
     
-    def _get_pos_left_right_random(self) -> TurnMovement:
+    def _get_pos_left_right_random(self) -> RelativePosition:
         p = gen.random()
         if p > 0.5:
-            return TurnLeft(1)
+            return RelativePosition.left(1)
         else:
-            return TurnRight(1)
+            return RelativePosition.right(1)
 
     def think(self, pedestrian_sem: Semaphore = None):
         if pedestrian_sem is not None and pedestrian_sem.state == "red":
@@ -99,19 +99,19 @@ class Pedestrian(Orientable):
             self._repr = "😰"
 
         if self.can_move_forward():
-            self._desired_movement = self._get_pos_forward()
+            self._desired_displacement = self._get_pos_forward()
         else:
             can_move_left = self.can_move_left()
             can_move_right = self.can_move_right()
             
             if can_move_left and not can_move_right:
-                self._desired_movement = TurnLeft(1)
+                self._desired_displacement = RelativePosition.left(1)
             elif can_move_right and not can_move_left:
-                self._desired_movement = TurnRight(1)
+                self._desired_displacement = RelativePosition.right(1)
             elif can_move_left and can_move_right:
-                self._desired_movement = self._get_pos_left_right_random()
+                self._desired_displacement = self._get_pos_left_right_random()
             else:
-                self._desired_movement = Still()
+                self._desired_displacement = RelativePosition.still()
 
     def move(self):
-        self._rel_grid.move(self._desired_movement)
+        self._rel_grid.move(self._desired_displacement)
