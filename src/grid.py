@@ -53,7 +53,7 @@ class Grid(Generic[T]):
             print(f"{i: ^3}", end="")
             for j in range(self.length):
                 if self.is_fill(i, j):
-                    print(f"{self._grid[i][j] : ^3}", end="")
+                    print(f"{self._grid[i][j]._repr : ^3}", end="")
                     # a = self._grid[i][j]
                     # if a.facing == "East":
                     #     print(f"{self._grid[i][j]._repr}>", end="")

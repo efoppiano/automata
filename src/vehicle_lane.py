@@ -7,6 +7,7 @@ from stoplight import StopLight
 
 from relative_position import RelativePosition
 from directions import Direction
+from vehicle import Vehicle
 
 gen = TPGenerator(3*10**6)
 
@@ -39,12 +40,15 @@ class VehicleLane:
             return
         
         offset = (self._rel_grid.length - self._vehicle_width) // 2
-        print(f"Offset: {offset}")
+        # print(f"Offset: {offset}")
         
-        for i in range(offset, offset + self._vehicle_width):
-            for j in range(self._vehicle_length):
-                value = "V" if self._rel_grid.facing == "South" else "^"
-                self._rel_grid.fill(RelativePosition.right(i) + RelativePosition.forward(j), value)
+        vehicle_pos = self._rel_grid.new_displaced(RelativePosition.right(offset))
+        Vehicle(vehicle_pos, self._vehicle_width, self._vehicle_length)
+        
+        # for i in range(offset, offset + self._vehicle_width):
+        #     for j in range(self._vehicle_length):
+        #         value = "V" if self._rel_grid.facing == "South" else "^"
+        #         self._rel_grid.fill(RelativePosition.right(i) + RelativePosition.forward(j), value)
 
     def update(self):
         self._generate_vehicle()

@@ -20,7 +20,7 @@ class RelativeGrid(Generic[T]):
         self._facing = facing
         self._grid = grid
 
-    def new_displaced(self, displacement: RelativePosition) -> Point:
+    def new_displaced(self, displacement: RelativePosition) -> 'RelativeGrid':
         new_center = displacement.apply(self._facing, self._center)
         return self.__class__(new_center, self._bounds, self._facing, self._grid)
     
