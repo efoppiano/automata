@@ -3,12 +3,13 @@ from typing import List
 from relative_grid import RelativeGrid
 from relative_position import RelativePosition
 from stoplight import StopLight
+from generator.tp_generator import TPGenerator
 
-
+gen = TPGenerator(4*10**7)
 
 class Vehicle:
   def __init__(self, rel_grid: RelativeGrid, width: int, length: int):
-    self._repr = "️ ⇩ " if rel_grid.facing == "South" else "⇧" # Por alguna razón este necesita los espacios
+    self._repr = gen.choice(["🟥", "🟧", "🟨", "🟩", "🟦", "🟪", "🟫"])
     self._vel = 1
     self._moved = False
     self._desired_movement = None
@@ -28,7 +29,7 @@ class Vehicle:
     
     self.driver_pos.fill(RelativePosition.still(),self)
     for rel_grid_i in self.relative_origins:
-      part = VehiclePart(self, rel_grid_i)
+      part = VehiclePart(self, rel_grid_i, self._repr)
       rel_grid_i.fill(RelativePosition.still(),part)
       
   def facing(self):
@@ -71,10 +72,10 @@ class Vehicle:
 
   
 class VehiclePart:
-  def __init__(self, parent: Vehicle, relative_origin: RelativeGrid):
+  def __init__(self, parent: Vehicle, relative_origin: RelativeGrid, repr: str):
     self.parent = parent
     self.relative_origin = relative_origin
-    self._repr = "⇩" if relative_origin.facing == "South" else "⇧"
+    self._repr = repr
     self._vel = 0
     
   @property

@@ -37,7 +37,7 @@ class Grid(Generic[T]):
     def pedestrian_passed(self, grid_direction: Direction):
         if grid_direction == "East":
             self._passed_to_east += 1
-        else:
+        elif grid_direction == "West":
             self._passed_to_west += 1
     
     def is_column_full(self, col: int) -> bool:
@@ -51,7 +51,6 @@ class Grid(Generic[T]):
         for i in range(self.length):
             print(f"{i: ^3}", end="")
         print()
-
         for i in range(self.width):
             print(f"{i: ^3}", end="")
             for j in range(self.length):
@@ -59,21 +58,17 @@ class Grid(Generic[T]):
                     value = self._grid[i][j]
                     if value.__class__.__name__ == "Pedestrian":
                         if value.facing == "East":
-                            print(f"{self._grid[i][j]._repr}>", end="")
+                            print(f"{self._grid[i][j]._repr}", end="")
                         else:
-                            print(f"<{self._grid[i][j]._repr}", end="")
+                            print(f"{self._grid[i][j]._repr}", end="")
                     else:
-                        print(f"{self._grid[i][j]._repr : ^3}", end="")
-                    # a = self._grid[i][j]
-                    # if a.facing == "East":
-                    #     print(f"{self._grid[i][j]._repr}>", end="")
-                    # else:
-                    #    print(f"<{self._grid[i][j]._repr}", end="")
+                        print(f"{self._grid[i][j]._repr}", end="")
                 else:
                     if CROSSWALK_START_ROW <= i < CROSSWALK_END_ROW and j % 4 <= 1:
-                        print(f"{'■' : ^3}", end="")
+                        print(f"{'⬜'}", end="")
                     else:
-                        print(f"{'□' : ^3}", end="")
+                        print(f"{'⬛'}", end="")
+
             print()
         
 
