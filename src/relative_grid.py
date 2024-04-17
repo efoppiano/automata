@@ -84,16 +84,18 @@ class RelativeGrid(Generic[T]):
             return self._grid.get_vertically_next(row, col)
         
         
-    def calc_dist_to_next(self, displacement: RelativePosition) -> Optional[int]:
+    def calc_dist_to_next(self, displacement: RelativePosition, f: Callable[[T], bool] = None) -> Optional[int]:
+        if f is None:
+            f = lambda _: True
         row, col = displacement.apply(self._facing, self._center)
         if self._facing == "East":
-            return self._grid.calc_dist_to_next(row, col, lambda elem: elem.facing == self._facing)
+            return self._grid.calc_dist_to_next(row, col, f)
         elif self._facing == "West":
-            return self._grid.calc_dist_to_prev(row, col, lambda elem: elem.facing == self._facing)
+            return self._grid.calc_dist_to_prev(row, col, f)
         elif self._facing == "North":
-            return self._grid.calc_dist_to_vertically_prev(row, col, lambda elem: elem.facing == self._facing)
+            return self._grid.calc_dist_to_vertically_prev(row, col, f)
         elif self._facing == "South":
-            return self._grid.calc_dist_to_vertically_next(row, col, lambda elem: elem.facing == self._facing)
+            return self._grid.calc_dist_to_vertically_next(row, col, f)
 
     def move(self, displacement: RelativePosition):
         if displacement.is_still():

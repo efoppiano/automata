@@ -6,6 +6,7 @@ from generator.tp_generator import TPGenerator
 from semaphore import Semaphore
 
 from relative_position import RelativePosition
+from directions import Direction
 
 gen = TPGenerator(3*10**6)
 
@@ -22,9 +23,15 @@ class VehicleLane:
     def _generate_vehicle(self):
         self._waiting_vehicles += gen.poi(self._arrival_rate)
 
+    @property
+    def facing(self) -> Direction:
+        return self._rel_grid.facing
+
     def _can_place_vehicle(self) -> bool:
         for i in range(self._rel_grid.length):
-            if self._rel_grid.get_next(RelativePosition.right(i)):
+            dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.right(i),
+                                                            lambda elem: elem.facing == self._rel_grid.facing)
+            if dist_to_next is not None and dist_to_next < self._vehicle_length:
                 return False
         return True
     
