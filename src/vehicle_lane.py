@@ -29,8 +29,7 @@ class VehicleLane:
 
     def _can_place_vehicle(self) -> bool:
         for i in range(self._rel_grid.length):
-            dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.right(i),
-                                                            lambda elem: elem.facing == self._rel_grid.facing)
+            dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.right(i))
             if dist_to_next is not None and dist_to_next < self._vehicle_length:
                 return False
         return True
