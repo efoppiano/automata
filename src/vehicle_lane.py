@@ -3,7 +3,7 @@ from typing import Tuple
 from relative_grid import RelativeGrid
 
 from generator.tp_generator import TPGenerator
-from semaphore import Semaphore
+from stoplight import StopLight
 
 from relative_position import RelativePosition
 from directions import Direction
@@ -12,13 +12,13 @@ gen = TPGenerator(3*10**6)
 
 class VehicleLane:
     def __init__(self, arrival_rate: int, vehicle_width: int, vehicle_length: int, 
-                 pedestrian_semaphore: Semaphore, rel_grid: RelativeGrid):
+                 pedestrian_stop_light: StopLight, rel_grid: RelativeGrid):
         self._vehicle_width = vehicle_width
         self._vehicle_length = vehicle_length
         self._rel_grid = rel_grid
         self._waiting_vehicles = 0
         self._arrival_rate = arrival_rate
-        self._pedestrian_semaphore = pedestrian_semaphore
+        self._pedestrian_stop_light = pedestrian_stop_light
 
     def _generate_vehicle(self):
         self._waiting_vehicles += gen.poi(self._arrival_rate)

@@ -6,7 +6,7 @@ from rectangle import Rectangle
 from pedestrian import Pedestrian
 from waiting_area import WaitingArea
 from generator.tp_generator import TPGenerator
-from semaphore import Semaphore
+from stoplight import StopLight
 from vehicle_lane import VehicleLane
 
 gen = TPGenerator(9*10**7)
@@ -21,7 +21,7 @@ class Automata:
         total_rows = vehicle_lane_prototype.width
         total_cols = crosswalk_cols + 2*waiting_area_prototype.length
         self._grid = Grid[Pedestrian](total_rows, total_cols)
-        self._pedestrian_sem = Semaphore(20, 10, "red")
+        self._pedestrian_stop_light = StopLight(20, 10, "red")
 
         self.build_vehicle_lanes(crosswalk_prototype, 
                                  car_prototype, 
@@ -43,8 +43,8 @@ class Automata:
         grid_area_west = RelativeGrid(crosswalk.upper_left, crosswalk, "East", self._grid)
         grid_area_east = RelativeGrid(crosswalk.lower_right, crosswalk, "West", self._grid)
 
-        self._waiting_area_west = WaitingArea(500/360, grid_area_west, self._pedestrian_sem)
-        self._waiting_area_east = WaitingArea(500/360, grid_area_east, self._pedestrian_sem)
+        self._waiting_area_west = WaitingArea(500/360, grid_area_west, self._pedestrian_stop_light)
+        self._waiting_area_east = WaitingArea(500/360, grid_area_east, self._pedestrian_stop_light)
         
 
 
@@ -61,22 +61,22 @@ class Automata:
             car_lane_zone = car_lane_zone_prototype.duplicate()
             car_lane_zone.move_right(waiting_area_length + i*car_lane_zone_prototype.length)
             grid_car_lane = RelativeGrid(car_lane_zone.lower_left, car_lane_zone, "North", self._grid)
-            self._car_lanes.append(VehicleLane(500/3600, car_prototype.length, car_prototype.width, self._pedestrian_sem, grid_car_lane))
+            self._car_lanes.append(VehicleLane(500/3600, car_prototype.length, car_prototype.width, self._pedestrian_stop_light, grid_car_lane))
         for i in range(car_lanes_amount//2):
             car_lane_zone = car_lane_zone_prototype.duplicate()
             car_lane_zone.move_right(waiting_area_length + i*car_lane_zone_prototype.length)
             grid_car_lane = RelativeGrid(car_lane_zone.upper_right, car_lane_zone, "South", self._grid)
-            self._car_lanes.append(VehicleLane(500/3600, car_prototype.length, car_prototype.width, self._pedestrian_sem, grid_car_lane))
+            self._car_lanes.append(VehicleLane(500/3600, car_prototype.length, car_prototype.width, self._pedestrian_stop_light, grid_car_lane))
 
     def update(self):
-        self._pedestrian_sem.update()
+        self._pedestrian_stop_light.update()
         # self._waiting_area_east.update()
         # self._waiting_area_west.update()
         for car_lane in self._car_lanes:
             car_lane.update()
         
         # self.show()
-        # self._grid.apply(lambda pedestrian, _: pedestrian.think(self._pedestrian_sem))
+        # self._grid.apply(lambda pedestrian, _: pedestrian.think(self._pedestrian_stop_light))
         
         # self._grid.apply(self.move_pedestrian)
         
@@ -92,7 +92,7 @@ class Automata:
         self._moved_pedestrians.add(pedestrian)
 
     def show(self):
-        self._pedestrian_sem.show()
+        self._pedestrian_stop_light.show()
         print("Waiting at East:", self._waiting_area_east)
         print("Waiting at West:", self._waiting_area_west)
         

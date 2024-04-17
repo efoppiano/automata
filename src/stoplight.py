@@ -1,10 +1,10 @@
 
 from typing import Literal
 
-SemaphoreState = Literal["red", "green"]
+StopLightState = Literal["red", "green"]
 
-class Semaphore:
-    def __init__(self, cycle: int, green_light_time: int, initial_state: SemaphoreState = "green"):
+class StopLight:
+    def __init__(self, cycle: int, green_light_time: int, initial_state: StopLightState = "green"):
         assert green_light_time < cycle
 
         self._cycle = cycle
@@ -19,7 +19,7 @@ class Semaphore:
             self._time_to_change = self._green_light_time if self._state == "green" else self._cycle - self._green_light_time
 
     @property
-    def state(self) -> SemaphoreState:
+    def state(self) -> StopLightState:
         return self._state
 
     

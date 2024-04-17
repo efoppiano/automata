@@ -4,7 +4,7 @@ from grid import Direction
 from relative_grid import RelativeGrid
 from generator.tp_generator import TPGenerator
 from relative_position import RelativePosition
-from semaphore import Semaphore
+from stoplight import StopLight
 
 from orientable import Orientable
 
@@ -93,8 +93,8 @@ class Pedestrian(Orientable):
         else:
             return RelativePosition.right(1)
 
-    def think(self, pedestrian_sem: Semaphore = None):
-        if pedestrian_sem is not None and pedestrian_sem.state == "red":
+    def think(self, pedestrian_stop_light: StopLight = None):
+        if pedestrian_stop_light is not None and pedestrian_stop_light.state == "red":
             self._vel = 6
             self._repr = "😰"
 

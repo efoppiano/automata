@@ -2,7 +2,7 @@ from typing import TypeVar
 
 from pedestrian import Pedestrian
 from generator.tp_generator import TPGenerator
-from semaphore import Semaphore
+from stoplight import StopLight
 from relative_grid import RelativeGrid
 from relative_position import RelativePosition
 
@@ -10,12 +10,12 @@ gen = TPGenerator(2**10**7)
 
 
 class WaitingArea:
-    def __init__(self, arrival_rate: float, rel_grid: RelativeGrid, pedestrian_sem: Semaphore, max_size: int = 100):
+    def __init__(self, arrival_rate: float, rel_grid: RelativeGrid, pedestrian_stop_light: StopLight, max_size: int = 100):
         self._rel_grid = rel_grid
         self._waiting_pedestrians = 0
         self._arrival_rate = arrival_rate
         self._total_generated_pedestrians = 0
-        self._pedestrian_sem = pedestrian_sem
+        self._pedestrian_stop_light = pedestrian_stop_light
         self._max_size = max_size
 
     def _generate_pedestrians(self):
@@ -51,7 +51,7 @@ class WaitingArea:
 
     def update(self):
         self._generate_pedestrians()
-        if self._pedestrian_sem.state == "green":
+        if self._pedestrian_stop_light.state == "green":
             self._place_pedestrians()
 
     def __repr__(self) -> str:
