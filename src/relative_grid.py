@@ -51,7 +51,7 @@ class RelativeGrid(Generic[T]):
         if self._grid.is_fill(row, col):
             if not ignore_opposite_direction:
                 return True
-            return self._grid.get_value(row, col).facing == self.facing
+            return self._grid.get_value(row, col).facing != opposite_direction(self.facing)
         return False
     
     def is_inbounds(self, displacement: RelativePosition) -> bool:
@@ -101,7 +101,7 @@ class RelativeGrid(Generic[T]):
         if displacement.is_still():
             return
         
-        if not self.is_fill(RelativePosition.still()):
+        if not self.is_fill(RelativePosition.still(), ignore_opposite_direction=False):
             raise Exception(f"Attempted to move an empty cell ({self._center[0]}, {self._center[1]})")
         
         if not self.is_inbounds(displacement):

@@ -1,3 +1,5 @@
+from typing import List
+
 from relative_grid import RelativeGrid
 from relative_position import RelativePosition
 from stoplight import StopLight
@@ -7,9 +9,10 @@ from stoplight import StopLight
 class Vehicle:
   def __init__(self, rel_grid: RelativeGrid, width: int, length: int):
     self._repr = "️ ⇩ " if rel_grid.facing == "South" else "⇧" # Por alguna razón este necesita los espacios
-    self._vel = 1
+    self._vel = 5
+    self._desired_movement = None
 
-    self.relative_origins = []
+    self.relative_origins: List[RelativeGrid] = []
     for i in range(width):
       for j in range(length):
         origin_ij = rel_grid.new_displaced(
@@ -26,15 +29,18 @@ class Vehicle:
       rel_grid_i.fill(RelativePosition.still(),part)
       
   def facing(self):
-    return self.relative_origin.facing
+    return self.driver_pos.facing
   
-  def think(self, _:StopLight):
-    pass
+  def think(self, pedestrian_stop_light: StopLight):
+    if pedestrian_stop_light.is_green():
+      self._desired_movement = RelativePosition.still()
+    else:
+      self._desired_movement = RelativePosition.forward(self._vel)
   
   def move(self):
-    self.driver_pos.move(RelativePosition.forward(self._vel))
+    self.driver_pos.move(self._desired_movement)
     for rel_grid_i in self.relative_origins:
-      rel_grid_i.move(RelativePosition.forward(self._vel))
+      rel_grid_i.move(self._desired_movement)
   
   def __repr__(self):
         return self._repr

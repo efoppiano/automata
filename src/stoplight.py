@@ -22,6 +22,8 @@ class StopLight:
     def state(self) -> StopLightState:
         return self._state
 
+    def is_green(self) -> bool:
+        return self._state == "green"
     
     def show(self):
         if self._state == "green":

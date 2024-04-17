@@ -94,7 +94,7 @@ class Pedestrian(Orientable):
             return RelativePosition.right(1)
 
     def think(self, pedestrian_stop_light: StopLight = None):
-        if pedestrian_stop_light is not None and pedestrian_stop_light.state == "red":
+        if pedestrian_stop_light is not None and not pedestrian_stop_light.is_green():
             self._vel = 6
             self._repr = "😰"
 
