@@ -7,6 +7,7 @@ from stoplight import StopLight
 class Vehicle:
   def __init__(self, rel_grid: RelativeGrid, width: int, length: int):
     self._repr = "️ ⇩ " if rel_grid.facing == "South" else "⇧" # Por alguna razón este necesita los espacios
+    self._vel = 1
 
     self.relative_origins = []
     for i in range(width):
@@ -17,7 +18,7 @@ class Vehicle:
         if i == 0 and j == length-1:
           self.driver_pos = origin_ij
         else:
-          self.relative_origins.append(origin_ij)
+          self.relative_origins.insert(0, origin_ij) # We will want to move the last ones first as they're in front
     
     self.driver_pos.fill(RelativePosition.still(),self)
     for rel_grid_i in self.relative_origins:
@@ -30,6 +31,11 @@ class Vehicle:
   def think(self, _:StopLight):
     pass
   
+  def move(self):
+    self.driver_pos.move(RelativePosition.forward(self._vel))
+    for rel_grid_i in self.relative_origins:
+      rel_grid_i.move(RelativePosition.forward(self._vel))
+  
   def __repr__(self):
         return self._repr
   
@@ -38,6 +44,7 @@ class VehiclePart:
     self.parent = parent
     self.relative_origin = relative_origin
     self._repr = "⇩" if relative_origin.facing == "South" else "⇧"
+    self._vel = 0
     
   @property
   def facing(self):
@@ -48,5 +55,8 @@ class VehiclePart:
   
   def __repr__(self):
         return self._repr
+      
+  def move(self):
+    pass
   
   

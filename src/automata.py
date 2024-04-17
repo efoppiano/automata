@@ -76,20 +76,20 @@ class Automata:
             car_lane.update()
         
         # self.show()
-        # self._grid.apply(lambda pedestrian, _: pedestrian.think(self._pedestrian_stop_light))
+        self._grid.apply(lambda object, _: object.think(self._pedestrian_stop_light))
         
-        # self._grid.apply(self.move_pedestrian)
+        self._grid.apply(self.move_object)
         
         self._moved_pedestrians.clear()
 
-    def move_pedestrian(self, pedestrian: Pedestrian, _: Tuple[int, int]):
-        if pedestrian in self._moved_pedestrians:
+    def move_object(self, object, _: Tuple[int, int]):
+        if object in self._moved_pedestrians:
             return
         try:
-            pedestrian.move()
+            object.move()
         except CellAlreadyFill:
             pass
-        self._moved_pedestrians.add(pedestrian)
+        self._moved_pedestrians.add(object)
 
     def show(self):
         self._pedestrian_stop_light.show()
