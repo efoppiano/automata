@@ -115,3 +115,6 @@ class Pedestrian(Orientable):
 
     def move(self):
         self._rel_grid.move(self._desired_displacement)
+
+    def remove(self):
+        pass

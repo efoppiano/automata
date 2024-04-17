@@ -9,8 +9,11 @@ from stoplight import StopLight
 class Vehicle:
   def __init__(self, rel_grid: RelativeGrid, width: int, length: int):
     self._repr = "️ ⇩ " if rel_grid.facing == "South" else "⇧" # Por alguna razón este necesita los espacios
-    self._vel = 5
+    self._vel = 1
+    self._moved = False
     self._desired_movement = None
+    self._width = width
+    self._length = length
 
     self.relative_origins: List[RelativeGrid] = []
     for i in range(width):
@@ -32,18 +35,29 @@ class Vehicle:
     return self.driver_pos.facing
   
   def think(self, pedestrian_stop_light: StopLight):
-    if pedestrian_stop_light.is_green():
+    if pedestrian_stop_light.is_green() and not self._moved:
       self._desired_movement = RelativePosition.still()
     else:
       self._desired_movement = RelativePosition.forward(self._vel)
   
   def move(self):
     self.driver_pos.move(self._desired_movement)
+
     for rel_grid_i in self.relative_origins:
-      rel_grid_i.move(self._desired_movement)
+      try:
+        rel_grid_i.move(self._desired_movement)
+      except Exception as e:
+        pass
+    if not self._desired_movement.is_still():
+      self._moved = True
   
   def __repr__(self):
         return self._repr
+
+  def remove(self):
+    for rel_grid_i in self.relative_origins:
+      rel_grid_i.clear(RelativePosition.still())
+
   
 class VehiclePart:
   def __init__(self, parent: Vehicle, relative_origin: RelativeGrid):
@@ -65,4 +79,5 @@ class VehiclePart:
   def move(self):
     pass
   
-  
+  def remove(self):
+    pass

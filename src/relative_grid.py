@@ -97,6 +97,10 @@ class RelativeGrid(Generic[T]):
         elif self._facing == "South":
             return self._grid.calc_dist_to_vertically_next(row, col, f)
 
+    def clear(self, displacement: RelativePosition):
+        row, col = displacement.apply(self._facing, self._center)
+        self._grid.clear(row, col)
+
     def move(self, displacement: RelativePosition):
         if displacement.is_still():
             return
@@ -105,8 +109,10 @@ class RelativeGrid(Generic[T]):
             raise Exception(f"Attempted to move an empty cell ({self._center[0]}, {self._center[1]})")
         
         if not self.is_inbounds(displacement):
-            self._grid.pedestrian_passed(self._facing)
+            self._grid.pedestrian_passed(self._facing)    
+            self._grid.get_value(self._center[0], self._center[1]).remove()
             self._grid.clear(self._center[0], self._center[1])
+
             return
 
         

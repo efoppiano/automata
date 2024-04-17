@@ -21,7 +21,7 @@ class Automata:
         total_rows = vehicle_lane_prototype.width
         total_cols = crosswalk_cols + 2*waiting_area_prototype.length
         self._grid = Grid[Pedestrian](total_rows, total_cols)
-        self._pedestrian_stop_light = StopLight(20, 10, "green")
+        self._pedestrian_stop_light = StopLight(20, 10, "red")
 
         self.build_vehicle_lanes(crosswalk_prototype, 
                                  car_prototype, 
