@@ -4,6 +4,7 @@ from grid import Direction
 from relative_grid import RelativeGrid
 from generator.tp_generator import TPGenerator
 from relative_position import RelativePosition
+from directions import opposite_direction
 from stoplight import StopLight
 
 from orientable import Orientable
@@ -56,7 +57,8 @@ class Pedestrian(Orientable):
         if self._rel_grid.is_fill(RelativePosition.left(1)):
             return False
         
-        prev = self._rel_grid.get_prev(RelativePosition.left(1))
+        prev = self._rel_grid.get_prev(RelativePosition.left(1),
+                                       lambda obj: obj.facing == self.facing)
         if prev is not None and self.facing == prev.facing and not self.is_faster_than(prev):
             return False
         
@@ -70,7 +72,8 @@ class Pedestrian(Orientable):
         if self._rel_grid.is_fill(RelativePosition.right(1)):
             return False
         
-        prev = self._rel_grid.get_prev(RelativePosition.right(1))
+        prev = self._rel_grid.get_prev(RelativePosition.right(1),
+                                       lambda obj: obj.facing == self.facing)
         if prev is not None and self.facing == prev.facing and not self.is_faster_than(prev):
             return False
         
@@ -81,7 +84,8 @@ class Pedestrian(Orientable):
         return self._vel > other._vel
     
     def _get_pos_forward(self) -> RelativePosition:
-        dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.still())
+        dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.still(),
+                                                        lambda obj: obj.facing != opposite_direction(self.facing))
         if dist_to_next is None or dist_to_next > self._vel:
             return RelativePosition.forward(self._vel)
         return RelativePosition.forward(dist_to_next)

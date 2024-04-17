@@ -14,14 +14,14 @@ gen = TPGenerator(9*10**7)
 class Automata:
     def __init__(self, crosswalk_rows: int, crosswalk_cols: int):
         crosswalk_prototype = Rectangle(crosswalk_cols, crosswalk_rows)
-        vehicle_lane_prototype = Rectangle(7, 2*5+crosswalk_prototype.width)
+        vehicle_lane_prototype = Rectangle(7, 2*6+crosswalk_prototype.width)
         waiting_area_prototype = Rectangle(0, crosswalk_rows)
         car_prototype = Rectangle(5, 6)
 
         total_rows = vehicle_lane_prototype.width
         total_cols = crosswalk_cols + 2*waiting_area_prototype.length
         self._grid = Grid[Pedestrian](total_rows, total_cols)
-        self._pedestrian_stop_light = StopLight(20, 10, "red")
+        self._pedestrian_stop_light = StopLight(90, 45, "green")
 
         self.build_vehicle_lanes(crosswalk_prototype, 
                                  car_prototype, 
@@ -37,14 +37,14 @@ class Automata:
                         vehicle_lane_prototype: Rectangle):
         crosswalk = crosswalk_prototype.duplicate()
         crosswalk.move_right(waiting_area_prototype.length)
-        crosswalk.move_down(vehicle_lane_prototype.width)
+        crosswalk.move_down(6)
         print(f"Pedestrian zone: {crosswalk}")
         
         grid_area_west = RelativeGrid(crosswalk.upper_left, crosswalk, "East", self._grid)
         grid_area_east = RelativeGrid(crosswalk.lower_right, crosswalk, "West", self._grid)
 
-        self._waiting_area_west = WaitingArea(500/360, grid_area_west, self._pedestrian_stop_light)
-        self._waiting_area_east = WaitingArea(500/360, grid_area_east, self._pedestrian_stop_light)
+        self._waiting_area_west = WaitingArea(1000/3600, grid_area_west, self._pedestrian_stop_light)
+        self._waiting_area_east = WaitingArea(1000/3600, grid_area_east, self._pedestrian_stop_light)
         
 
 
@@ -70,15 +70,16 @@ class Automata:
 
     def update(self):
         self._pedestrian_stop_light.update()
-        # self._waiting_area_east.update()
-        # self._waiting_area_west.update()
-        for car_lane in self._car_lanes:
-            car_lane.update()
-        
+        self._waiting_area_east.update()
+        self._waiting_area_west.update()
+
         # self.show()
         self._grid.apply(lambda object, _: object.think(self._pedestrian_stop_light))
         
         self._grid.apply(self.move_object)
+
+        for car_lane in self._car_lanes:
+            car_lane.update()
         
         self._moved_pedestrians.clear()
 

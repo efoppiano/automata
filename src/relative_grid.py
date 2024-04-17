@@ -61,27 +61,33 @@ class RelativeGrid(Generic[T]):
 
         return 0 <= row < self._grid.width and 0 <= col < self._grid.length
 
-    def get_prev(self, displacement: RelativePosition) -> Optional[T]:
+    def get_prev(self, displacement: RelativePosition, f: Callable[[T], bool] = None) -> Optional[T]:
+        if f is None:
+            f = lambda _: True
+
         row, col = displacement.apply(self._facing, self._center)
         if self._facing == "East":
-            return self._grid.get_prev(row, col)
+            return self._grid.get_prev(row, col, f)
         elif self._facing == "West":
-            return self._grid.get_next(row, col)
+            return self._grid.get_next(row, col, f)
         elif self._facing == "North":
-            return self._grid.get_vertically_next(row, col)
+            return self._grid.get_vertically_next(row, col, f)
         elif self._facing == "South":
-            return self._grid.get_vertically_prev(row, col)
+            return self._grid.get_vertically_prev(row, col, f)
         
-    def get_next(self, displacement: RelativePosition) -> Optional[T]:
+    def get_next(self, displacement: RelativePosition, f: Callable[[T], bool] = None) -> Optional[T]:
+        if f is None:
+            f = lambda _: True
+
         row, col = displacement.apply(self._facing, self._center)
         if self._facing == "East":
-            return self._grid.get_next(row, col)
+            return self._grid.get_next(row, col, f)
         elif self._facing == "West":
-            return self._grid.get_prev(row, col)
+            return self._grid.get_prev(row, col, f)
         elif self._facing == "North":
-            return self._grid.get_vertically_prev(row, col)
+            return self._grid.get_vertically_prev(row, col, f)
         elif self._facing == "South":
-            return self._grid.get_vertically_next(row, col)
+            return self._grid.get_vertically_next(row, col, f)
         
         
     def calc_dist_to_next(self, displacement: RelativePosition, f: Callable[[T], bool] = None) -> Optional[int]:

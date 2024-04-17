@@ -5,6 +5,9 @@ from directions import Direction
 
 gen = TPGenerator(4*10**7)
 
+CROSSWALK_START_ROW = 6
+CROSSWALK_END_ROW = CROSSWALK_START_ROW+8
+
 class CellAlreadyFill(Exception):
     def __init__(self, row: int, col: int, v = None):
         self.row = row
@@ -53,14 +56,24 @@ class Grid(Generic[T]):
             print(f"{i: ^3}", end="")
             for j in range(self.length):
                 if self.is_fill(i, j):
-                    print(f"{self._grid[i][j]._repr : ^3}", end="")
+                    value = self._grid[i][j]
+                    if value.__class__.__name__ == "Pedestrian":
+                        if value.facing == "East":
+                            print(f"{self._grid[i][j]._repr}>", end="")
+                        else:
+                            print(f"<{self._grid[i][j]._repr}", end="")
+                    else:
+                        print(f"{self._grid[i][j]._repr : ^3}", end="")
                     # a = self._grid[i][j]
                     # if a.facing == "East":
                     #     print(f"{self._grid[i][j]._repr}>", end="")
                     # else:
                     #    print(f"<{self._grid[i][j]._repr}", end="")
                 else:
-                    print(f"{'□' : ^3}", end="")
+                    if CROSSWALK_START_ROW <= i < CROSSWALK_END_ROW and j % 4 <= 1:
+                        print(f"{'■' : ^3}", end="")
+                    else:
+                        print(f"{'□' : ^3}", end="")
             print()
         
 

@@ -34,6 +34,14 @@ class Vehicle:
   def facing(self):
     return self.driver_pos.facing
   
+  def can_move(self) -> bool:
+    for i in range(self._width):
+      dist_to_next = self.driver_pos.calc_dist_to_next(RelativePosition.right(i))
+      if dist_to_next is not None and dist_to_next < self._vel:
+        return False
+      
+    return True
+
   def think(self, pedestrian_stop_light: StopLight):
     if pedestrian_stop_light.is_green() and not self._moved:
       self._desired_movement = RelativePosition.still()
@@ -41,6 +49,9 @@ class Vehicle:
       self._desired_movement = RelativePosition.forward(self._vel)
   
   def move(self):
+    if not self.can_move():
+      return
+
     self.driver_pos.move(self._desired_movement)
 
     for rel_grid_i in self.relative_origins:
