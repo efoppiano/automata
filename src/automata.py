@@ -27,9 +27,13 @@ class Automata:
         self._epoch = 0
 
     def build_waiting_areas(self):
-        walking_zone = Rectangle(self._config.crosswalk_prot.rows, self._config.total_cols)
+        if self._config.waiting_area_prot.cols > 0:
+            walking_zone = Rectangle(self._config.crosswalk_prot.rows, self._config.crosswalk_prot.cols + 2)
+            walking_zone.move_right(self._config.waiting_area_prot.cols - 1)
+        else:
+            walking_zone = Rectangle(self._config.crosswalk_prot.rows, self._config.crosswalk_prot.cols)
         walking_zone.move_down(self._config.vehicle_prot.rows)
-    
+            
         grid_area_west = RelativeGrid(walking_zone.upper_left, walking_zone, "East", self._grid)
         grid_area_east = RelativeGrid(walking_zone.lower_right, walking_zone, "West", self._grid)
 
