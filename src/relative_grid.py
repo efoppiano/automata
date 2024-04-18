@@ -57,7 +57,7 @@ class RelativeGrid(Generic[T]):
             return self._grid.get_value(row, col).facing != opposite_direction(self.facing)
         return False
     
-    def is_inbounds(self, displacement: RelativePosition) -> bool:
+    def is_inbounds(self, displacement: RelativePosition = RelativePosition.still()) -> bool:
         row, col = displacement.apply(self._facing, self._center)
         if not self._bounds.is_inside((row, col)):
             return False
@@ -110,7 +110,7 @@ class RelativeGrid(Generic[T]):
         row, col = displacement.apply(self._facing, self._center)
         return zone.distance_to((row, col))
 
-    def clear(self, displacement: RelativePosition):
+    def clear(self, displacement: RelativePosition = RelativePosition.still()):
         row, col = displacement.apply(self._facing, self._center)
         self._grid.clear(row, col)
 
@@ -122,11 +122,7 @@ class RelativeGrid(Generic[T]):
             raise Exception(f"Attempted to move an empty cell ({self._center[0]}, {self._center[1]})")
         
         if not self.is_inbounds(displacement):
-            self._grid.pedestrian_passed(self._facing)    
-            self._grid.get_value(self._center[0], self._center[1]).remove()
-            self._grid.clear(self._center[0], self._center[1])
-
-            return
+            raise Exception(f"Attempted to move out of bounds cell {displacement.apply(self._facing, self._center)} - Bounds: {self._bounds}")
 
         
         if self.is_fill(displacement):

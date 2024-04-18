@@ -118,7 +118,7 @@ class Pedestrian(Orientable):
                 self._desired_displacement = RelativePosition.still()
 
     def move(self):
+        if not self._rel_grid.is_inbounds(self._desired_displacement):
+            self._rel_grid.clear()
+            return
         self._rel_grid.move(self._desired_displacement)
-
-    def remove(self):
-        pass

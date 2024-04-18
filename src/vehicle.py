@@ -62,14 +62,16 @@ class Vehicle:
   def move(self):
     if not self.can_move():
       return
+    
+    if not self.driver_pos.is_inbounds(self._desired_movement):
+      self.remove()
+      return
 
     self.driver_pos.move(self._desired_movement)
 
     for rel_grid_i in self.relative_origins:
-      try:
-        rel_grid_i.move(self._desired_movement)
-      except Exception as e:
-        pass
+      rel_grid_i.move(self._desired_movement)
+      
     if not self._desired_movement.is_still():
       self._moved = True
     if not self._crossing:
@@ -80,8 +82,9 @@ class Vehicle:
         return self._repr
 
   def remove(self):
+    self.driver_pos.clear()
     for rel_grid_i in self.relative_origins:
-      rel_grid_i.clear(RelativePosition.still())
+      rel_grid_i.clear()
 
   
 class VehiclePart:
