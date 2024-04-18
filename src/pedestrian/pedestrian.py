@@ -101,6 +101,14 @@ class Pedestrian(Orientable):
             return RelativePosition.right(1)
 
     def think(self, crosswalk_zone: Rectangle, pedestrian_stop_light: StopLight):
+        if pedestrian_stop_light.is_yellow():
+            if not self._crossing:
+                self._desired_displacement = RelativePosition.still()
+            else:
+                self._vel = 6
+                self._repr = "😰"
+            return
+        
         if pedestrian_stop_light.is_red():
             if not self._rel_grid.is_in(crosswalk_zone):
                 self._desired_displacement = RelativePosition.still()

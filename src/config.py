@@ -11,7 +11,8 @@ DEFAULT_VEHICLE_LANES = 6
 DEFAULT_VEHICLE_ROWS = 6
 DEFAULT_VEHICLE_COLS = 5
 DEFAULT_STOP_LIGHT_CYCLE = 90
-DEFAULT_GREEN_LIGHT_TIME = 20
+DEFAULT_GREEN_LIGHT_TIME = 30
+DEFAULT_YELLOY_LIGHT_TIME = 5
 DEFAULT_PEDESTRIAN_ARRIVAL_RATE = 1000/3600
 DEFAULT_VEHICLE_ARRIVAL_RATE = 1400/(6*3600)
 
@@ -30,7 +31,8 @@ class Config:
         vehicle_cols = os.environ.get("vehicle_cols", DEFAULT_VEHICLE_COLS)
         stop_light_cycle = os.environ.get("stop_light_cycle", DEFAULT_STOP_LIGHT_CYCLE)
         green_light_time = os.environ.get("green_light_time", DEFAULT_GREEN_LIGHT_TIME)
-        pedestrian_stop_light = StopLight(stop_light_cycle, green_light_time, "green")
+        yellow_light_time = os.environ.get("yellow_light_time", DEFAULT_YELLOY_LIGHT_TIME)
+        pedestrian_stop_light = StopLight(stop_light_cycle, green_light_time, yellow_light_time)
         pedestrian_arrival_rate = os.environ.get("pedestrian_arrival_rate", DEFAULT_PEDESTRIAN_ARRIVAL_RATE)
         vehicle_arrival_rate = os.environ.get("vehicle_arrival_rate", DEFAULT_VEHICLE_ARRIVAL_RATE)
 
