@@ -9,6 +9,7 @@ from generator.tp_generator import TPGenerator
 from stoplight import StopLight
 from vehicle.vehicle_lane import VehicleLane
 from config import Config
+from plotter import Plotter
 
 gen = TPGenerator(9*10**7)
 
@@ -25,6 +26,7 @@ class Automata:
 
         self._moved_entities = set()
         self._epoch = 0
+        self._plotter = Plotter(self._grid, self._config)
 
     def build_waiting_areas(self):
         if self._config.waiting_area_prot.cols > 0:
@@ -92,7 +94,7 @@ class Automata:
         print("Waiting at East:", self._waiting_areas[0])
         print("Waiting at West:", self._waiting_areas[1])
         
-        self._grid.show()
+        self._plotter.plot()
 
     def advance_to(self, epoch: int):
         while self._epoch < epoch:

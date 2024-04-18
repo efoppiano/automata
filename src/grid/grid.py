@@ -2,6 +2,7 @@ from typing import TypeVar, Generic, Optional, Callable, Tuple
 
 from generator.tp_generator import TPGenerator
 from directions import Direction
+from rectangle import Point, Rectangle
 
 gen = TPGenerator(4*10**7)
 
@@ -42,43 +43,42 @@ class Grid(Generic[T]):
         elif grid_direction == "West":
             self._passed_to_west += 1
 
-    def show(self):
-        print(f"{'': ^2}", end="")
-        for i in range(self.cols):
-            # if even, print with color red, else print with color blue
-            if i % 2 == 0:
+    def _plot_col_numbers(self, bounds: Rectangle):
+        print("  ", end="")
+        for col in range(bounds.start_col, bounds.end_col+1):
+            if col % 2 == 0:
                 print("\033[91m", end="")
             else:
                 print("\033[94m", end="")
-            print(f"{i: >2}", end="")
+            print(f"{col: >2}", end="")
             print("\033[0m", end="")
         print()
-        for i in range(END_ROW):
 
-            # if i < CROSSWALK_START_ROW:
-            #    continue
-            if i % 2 == 0:
-                print("\033[91m", end="")
-            else:
-                print("\033[94m", end="")
-            print(f"{i: ^2}", end="")
-            print("\033[0m", end="")
-            for j in range(self.cols):
-                if self.is_fill(i, j):
-                    value = self._grid[i][j]
-                    if value.__class__.__name__ == "Pedestrian":
-                        if value.facing == "East":
-                            print(f"{self._grid[i][j]._repr}", end="")
-                        else:
-                            print(f"{self._grid[i][j]._repr}", end="")
-                    else:
-                        print(f"{self._grid[i][j]._repr}", end="")
+    def _plot_row_number(self, row: int):
+        if row % 2 == 0:
+            print("\033[91m", end="")
+        else:
+            print("\033[94m", end="")
+        print(f"{row: ^2}", end="")
+        print("\033[0m", end="")
+
+    def plot(self, f: Callable[[Point, Optional[T]], Optional[str]], bounds: Rectangle = None):
+        if bounds is None:
+            bounds = Rectangle(self.rows, self.cols)
+
+        self._plot_col_numbers(bounds)
+
+        for row in range(bounds.start_row, bounds.end_row+1):
+            self._plot_row_number(row)
+            
+            for col in range(bounds.start_col, bounds.end_col+1):
+                if not bounds.is_inside((row, col)):
+                    continue
+                if self.is_fill(row, col):
+                    s = f((row, col), self.get_value(row, col))
                 else:
-                    if CROSSWALK_START_ROW <= i < CROSSWALK_END_ROW and j % 4 <= 1:
-                        print(f"{'⬜'}", end="")
-                    else:
-                        print(f"{'⬛'}", end="")
-
+                    s = f((row, col), None)
+                print(s, end="")
             print()
         
 
