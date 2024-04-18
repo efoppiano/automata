@@ -14,6 +14,7 @@ class Pedestrian(Orientable):
     def __init__(self, rel_grid: RelativeGrid, velocity: int = None, repr: str = None):
         self._desired_displacement = None
         self._rel_grid = rel_grid
+        self._crossing = False
 
         if velocity is not None:
             self._vel = velocity
@@ -47,19 +48,22 @@ class Pedestrian(Orientable):
             return 2
 
     def can_move_forward(self) -> bool:
-        return not self._rel_grid.is_fill(RelativePosition.forward(1))
+        dist_to_next =  self._rel_grid.calc_dist_to_next(RelativePosition.still(),
+                                                         lambda obj: (obj.facing == opposite_direction(self.facing)\
+                                                                      or obj.facing == self.facing) and obj._crossing)
+        return dist_to_next is None or dist_to_next > 1
     
     def can_move_left(self) -> bool:
         if not self._rel_grid.is_inbounds(RelativePosition.left(1)):
             return False
         
-        if self._rel_grid.is_fill(RelativePosition.left(1)):
+        if self._rel_grid.is_fill(RelativePosition.left(1), False):
             return False
         
         prev = self._rel_grid.get_prev(RelativePosition.left(1),
                                        lambda obj: obj.facing == self.facing)
-        if prev is not None and self.facing == prev.facing and not self.is_faster_than(prev):
-            return False
+        if prev is None or self.is_faster_than(prev):
+            return True
         
         dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.left(1))
         return dist_to_next is None or dist_to_next > self._vel
@@ -68,13 +72,13 @@ class Pedestrian(Orientable):
         if not self._rel_grid.is_inbounds(RelativePosition.right(1)):
             return False
         
-        if self._rel_grid.is_fill(RelativePosition.right(1)):
+        if self._rel_grid.is_fill(RelativePosition.right(1), False):
             return False
         
         prev = self._rel_grid.get_prev(RelativePosition.right(1),
                                        lambda obj: obj.facing == self.facing)
-        if prev is not None and self.facing == prev.facing and not self.is_faster_than(prev):
-            return False
+        if prev is None or self.is_faster_than(prev):
+            return True
         
         dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.right(1))
         return dist_to_next is None or dist_to_next > self._vel
@@ -96,15 +100,15 @@ class Pedestrian(Orientable):
         else:
             return RelativePosition.right(1)
 
-    def think(self, crosswalk_zone: Rectangle, pedestrian_stop_light: StopLight = None):
-        if pedestrian_stop_light.is_red() and not self._rel_grid.is_in(crosswalk_zone):
-            self._desired_displacement = RelativePosition.still()
-            return
-        
-        if pedestrian_stop_light is not None and pedestrian_stop_light.is_red():
-            self._vel = 6
-            self._repr = "😰"
-
+    def think(self, crosswalk_zone: Rectangle, pedestrian_stop_light: StopLight):
+        if pedestrian_stop_light.is_red():
+            if not self._rel_grid.is_in(crosswalk_zone):
+                self._desired_displacement = RelativePosition.still()
+                return
+            else:
+                self._vel = 6
+                self._repr = "😰"            
+    
         if self.can_move_forward():
             self._desired_displacement = self._get_pos_forward()
         else:
@@ -120,8 +124,18 @@ class Pedestrian(Orientable):
             else:
                 self._desired_displacement = RelativePosition.still()
 
-    def move(self, _: Rectangle):
+    def move(self, crosswalk_zone: Rectangle):
         if not self._rel_grid.is_inbounds(self._desired_displacement):
             self._rel_grid.clear()
             return
+        
+        while self._rel_grid.is_fill(self._desired_displacement, False):
+            self._desired_displacement.decrease()
+            if self._desired_displacement.is_still():
+                return
         self._rel_grid.move(self._desired_displacement)
+        if not self._rel_grid.is_in(crosswalk_zone):
+            self._rel_grid.clear()
+            return
+        if not self._crossing:
+            self._crossing = self._rel_grid.is_in(crosswalk_zone)

@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 
 from grid.grid import Grid, CellAlreadyFill
 from grid.relative_grid import RelativeGrid
@@ -8,95 +8,89 @@ from pedestrian.waiting_area import WaitingArea
 from generator.tp_generator import TPGenerator
 from stoplight import StopLight
 from vehicle.vehicle_lane import VehicleLane
+from config import Config
 
 gen = TPGenerator(9*10**7)
 
 class Automata:
-    def __init__(self, crosswalk_rows: int, crosswalk_cols: int):
-        crosswalk_prototype = Rectangle(crosswalk_rows, crosswalk_cols)
-        vehicle_lane_prototype = Rectangle(3*6+crosswalk_prototype.rows, 7)
-        waiting_area_prototype = Rectangle(crosswalk_rows, 1)
-        car_prototype = Rectangle(6, 5)
+    def __init__(self):
+        self._config = Config.new_from_env_file()
+        self._grid = Grid(self._config.total_rows, self._config.total_cols)
+        self._crosswalk_zone = Rectangle(self._config.crosswalk_prot.rows, self._config.crosswalk_prot.cols)
+        self._crosswalk_zone.move_down(self._config.vehicle_prot.rows)
+        self._crosswalk_zone.move_right(self._config.waiting_area_prot.cols)
 
-        total_rows = vehicle_lane_prototype.rows
-        total_cols = crosswalk_cols + 2*waiting_area_prototype.cols
-        self._grid = Grid[Pedestrian](total_rows, total_cols)
-        self._pedestrian_stop_light = StopLight(90, 20, "green")
+        self.build_waiting_areas()
+        self.build_vehicle_lanes()
 
-        crosswalk = crosswalk_prototype.duplicate()
-        crosswalk.move_right(waiting_area_prototype.cols)
-        crosswalk.move_down(6)
-        self._crosswalk_zone = crosswalk
-        print(f"Crosswalk zone: {self._crosswalk_zone}")
-        self.build_vehicle_lanes(self._crosswalk_zone, 
-                                 car_prototype, 
-                                 vehicle_lane_prototype, 
-                                 waiting_area_prototype)
-        
-        walking_zone = Rectangle(crosswalk.rows, crosswalk.cols + 2*waiting_area_prototype.cols)
-        walking_zone.move_down(6)
-        self.build_waiting_areas(walking_zone)
+        self._moved_entities = set()
+        self._epoch = 0
 
-        self._moved_pedestrians = set()
-
-    def build_waiting_areas(self, walking_zone: Rectangle):
-
+    def build_waiting_areas(self):
+        walking_zone = Rectangle(self._config.crosswalk_prot.rows, self._config.total_cols)
+        walking_zone.move_down(self._config.vehicle_prot.rows)
+    
         grid_area_west = RelativeGrid(walking_zone.upper_left, walking_zone, "East", self._grid)
         grid_area_east = RelativeGrid(walking_zone.lower_right, walking_zone, "West", self._grid)
 
-        self._waiting_area_west = WaitingArea(1000/3600, grid_area_west)
-        self._waiting_area_east = WaitingArea(1000/3600, grid_area_east)
-        
+        self._waiting_areas: List[WaitingArea] = []
+        waiting_area_west = WaitingArea(1000/3600, grid_area_west)
+        waiting_area_east = WaitingArea(1000/3600, grid_area_east)
+
+        self._waiting_areas.append(waiting_area_west)
+        self._waiting_areas.append(waiting_area_east)
+    
 
 
-    def build_vehicle_lanes(self,
-                            crosswalk_zone: Rectangle,
-                            car_prototype: Rectangle,
-                            car_lane_zone_prototype: Rectangle,
-                            waiting_area_prototype: Rectangle):
-        car_lanes_amount = crosswalk_zone.cols // car_lane_zone_prototype.cols
-        waiting_area_length = waiting_area_prototype.cols
-
-        self._car_lanes = []
-        for i in range(car_lanes_amount//2, car_lanes_amount):
-            car_lane_zone = car_lane_zone_prototype.duplicate()
-            car_lane_zone.move_right(waiting_area_length + i*car_lane_zone_prototype.cols)
-            grid_car_lane = RelativeGrid(car_lane_zone.lower_left, car_lane_zone, "North", self._grid)
-            self._car_lanes.append(VehicleLane(1400/(6*3600), car_prototype, crosswalk_zone, self._pedestrian_stop_light, grid_car_lane))
-        for i in range(car_lanes_amount//2):
-            car_lane_zone = car_lane_zone_prototype.duplicate()
-            car_lane_zone.move_right(waiting_area_length + i*car_lane_zone_prototype.cols)
-            grid_car_lane = RelativeGrid(car_lane_zone.upper_right, car_lane_zone, "South", self._grid)
-            self._car_lanes.append(VehicleLane(1400/(6*3600), car_prototype, crosswalk_zone, self._pedestrian_stop_light, grid_car_lane))
+    def build_vehicle_lanes(self):
+        self._vehicle_lanes: List[VehicleLane] = []
+        vehicle_lanes_amount = self._config.crosswalk_prot.cols // self._config.vehicle_lane_prot.cols
+        for i in range(vehicle_lanes_amount):
+            vehicle_lane_zone = self._config.vehicle_lane_prot.duplicate()
+            vehicle_lane_zone.move_right(self._config.waiting_area_prot.cols + i*vehicle_lane_zone.cols)
+            
+            if i < self._config.vehicle_lane_prot.cols//2:
+                facing = "South"
+                origin = vehicle_lane_zone.upper_right
+            else:
+                facing = "North"
+                origin = vehicle_lane_zone.lower_left
+            
+            grid = RelativeGrid(origin, vehicle_lane_zone, facing, self._grid)
+            vehicle_lane = VehicleLane(self._config, grid)
+            self._vehicle_lanes.append(vehicle_lane)
 
     def update(self):
-        self._pedestrian_stop_light.update()
-        self._waiting_area_east.update()
-        self._waiting_area_west.update()
+        self._config.pedestrian_stop_light.update()
+        for waiting_area in self._waiting_areas:
+            waiting_area.update()
 
-        # self.show()
-        self._grid.apply(lambda object, _: object.think(self._crosswalk_zone, self._pedestrian_stop_light))
+        self._grid.apply(lambda object, _: object.think(self._crosswalk_zone, self._config.pedestrian_stop_light))
         
         self._grid.apply(self.move_object)
 
-        for car_lane in self._car_lanes:
-            car_lane.update()
+        for vehicle_lane in self._vehicle_lanes:
+            vehicle_lane.update()
         
-        self._moved_pedestrians.clear()
+        self._moved_entities.clear()
+        self._epoch += 1
 
     def move_object(self, object, _: Tuple[int, int]):
-        if object in self._moved_pedestrians:
+        if object in self._moved_entities:
             return
-        try:
-            object.move(self._crosswalk_zone)
-        except CellAlreadyFill:
-            pass
-        self._moved_pedestrians.add(object)
+        object.move(self._crosswalk_zone)
+
+        self._moved_entities.add(object)
 
     def show(self):
-        self._pedestrian_stop_light.show()
-        print("Waiting at East:", self._waiting_area_east)
-        print("Waiting at West:", self._waiting_area_west)
+        print(f"Epoch: {self._epoch}")
+        self._config.pedestrian_stop_light.show()
+        print("Waiting at East:", self._waiting_areas[0])
+        print("Waiting at West:", self._waiting_areas[1])
         
         self._grid.show()
+
+    def advance_to(self, epoch: int):
+        while self._epoch < epoch:
+            self.update()
 

@@ -54,7 +54,8 @@ class RelativeGrid(Generic[T]):
         if self._grid.is_fill(row, col):
             if not ignore_opposite_direction:
                 return True
-            return self._grid.get_value(row, col).facing != opposite_direction(self.facing)
+            ret = self._grid.get_value(row, col).facing != opposite_direction(self.facing)
+            return ret
         return False
     
     def is_inbounds(self, displacement: RelativePosition = RelativePosition.still()) -> bool:

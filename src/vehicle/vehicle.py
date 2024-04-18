@@ -5,17 +5,17 @@ from relative_position import RelativePosition
 from stoplight import StopLight
 from generator.tp_generator import TPGenerator
 from rectangle import Rectangle
+from orientable import Orientable
 
 gen = TPGenerator(4 * 10 ** 7)
 
 
-class Vehicle:
-    def __init__(self, origin: RelativeGrid, crosswalk_zone: Rectangle, prototype: Rectangle):
+class Vehicle(Orientable):
+    def __init__(self, origin: RelativeGrid, prototype: Rectangle):
         self._repr = gen.choice(["🟥", "🟧", "🟨", "🟩", "🟦", "🟪", "🟫"])
         self._vel = 5
         self._crossing = False
         self._desired_movement = None
-        # These are swapped on purpose
         self._width = prototype.cols
         self._length = prototype.rows
 
