@@ -1,12 +1,21 @@
 from typing import Tuple
 
-Point = Tuple[int, int]
+RowNumber = int
+ColNumber = int
+Point = Tuple[RowNumber, ColNumber]
 
 class Rectangle:
-    def __init__(self, length: int, width: int):
-        self._upper_left = (0, 0)
-        self._lower_right = (width - 1, length - 1)
+    def __init__(self, rows: int, cols: int):
+        self._upper_left: Point = (0, 0)
+        self._lower_right: Point = (rows - 1, cols - 1)
 
+    @classmethod
+    def _new_with_points(cls, upper_left: Point, lower_right: Point):
+        new_rect = Rectangle(0, 0)
+        new_rect._upper_left = (upper_left[0], upper_left[1])
+        new_rect._lower_right = (lower_right[0], lower_right[1])
+        return new_rect
+    
     def is_inside(self, point: Point) -> bool:
         x, y = point
         x1, y1 = self._upper_left
@@ -17,12 +26,28 @@ class Rectangle:
         return f"Rectangle({self._upper_left}, {self._lower_right})"
     
     @property
-    def width(self) -> int:
-        return self._lower_right[0] - self._upper_left[0] + 1
+    def start_col(self) -> int:
+        return self._upper_left[1]
     
     @property
-    def length(self) -> int:
-        return self._lower_right[1] - self._upper_left[1] + 1
+    def start_row(self) -> int:
+        return self._upper_left[0]
+    
+    @property
+    def end_col(self) -> int:
+        return self._lower_right[1]
+    
+    @property
+    def end_row(self) -> int:
+        return self._lower_right[0]
+    
+    @property
+    def cols(self) -> int:
+        return self.end_col - self.start_col + 1
+    
+    @property
+    def rows(self) -> int:
+        return self.end_row - self.start_row + 1
     
     @property
     def upper_left(self) -> Point:
@@ -41,33 +66,28 @@ class Rectangle:
         return (self._lower_right[0], self._upper_left[1])
     
 
-    def move_left(self, amount: int):
-        self._upper_left = (self._upper_left[0], self._upper_left[1] - amount)
-        self._lower_right = (self._lower_right[0], self._lower_right[1] - amount)
+    def move_up(self, rows: int):
+        self._upper_left = (self._upper_left[0] - rows, self._upper_left[1])
+        self._lower_right = (self._lower_right[0] - rows, self._lower_right[1])
 
-    def move_right(self, amount: int):
-        return self.move_left(-amount)
+    def move_down(self, rows: int):
+        return self.move_up(-rows)
     
-    def move_up(self, amount: int):
-        self._upper_left = (self._upper_left[0] - amount, self._upper_left[1])
-        self._lower_right = (self._lower_right[0] - amount, self._lower_right[1])
+    def move_left(self, cols: int):
+        self._upper_left = (self._upper_left[0], self._upper_left[1] - cols)
+        self._lower_right = (self._lower_right[0], self._lower_right[1] - cols)
 
-    def move_down(self, amount: int):
-        return self.move_up(-amount)
+    def move_right(self, cols: int):
+        return self.move_left(-cols)
     
     def duplicate(self):
-        return Rectangle(self.length, self.width)
+        return Rectangle._new_with_points(self._upper_left, self._lower_right)
     
     def distance_to(self, point: Point) -> int:
-        x, y = point
-        x1, y1 = self._upper_left
-        x2, y2 = self._lower_right
-        if x1 <= x <= x2:
-            dist = min(abs(y - y1), abs(y - y2)) - 1
-            return dist
-        if y1 <= y <= y2:
-            dist = min(abs(x - x1), abs(x - x2)) - 1
-            return dist
+        row, col = point
+
+        if self.start_row <= row <= self.end_row:
+            return min(abs(self.start_col - col), abs(self.end_col - col)) - 1
+        if self.start_col <= col <= self.end_col:
+            return min(abs(self.start_row - row), abs(self.end_row - row)) - 1
         raise ValueError(f"Cannot calculate distance to point {point} from rectangle {self}")
-            
-        return 0

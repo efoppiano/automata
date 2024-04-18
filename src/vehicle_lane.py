@@ -34,9 +34,9 @@ class VehicleLane:
         return self._rel_grid.facing
 
     def _can_place_vehicle(self) -> bool:
-        for i in range(self._rel_grid.length):
+        for i in range(self._rel_grid.cols):
             dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.right(i))
-            if dist_to_next is not None and dist_to_next < self._vehicle_prototype.width:
+            if dist_to_next is not None and dist_to_next < self._vehicle_prototype.rows:
                 return False
         return True
     
@@ -44,7 +44,7 @@ class VehicleLane:
         if self._waiting_vehicles == 0 or not self._can_place_vehicle():
             return
         
-        offset = (self._rel_grid.length - self._vehicle_prototype.length) // 2
+        offset = (self._rel_grid.cols - self._vehicle_prototype.cols) // 2
         
         vehicle_origin = self._rel_grid.new_displaced(RelativePosition.right(offset))
         Vehicle(vehicle_origin, self._crosswalk_zone, self._vehicle_prototype)

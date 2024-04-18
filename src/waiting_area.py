@@ -10,12 +10,11 @@ gen = TPGenerator(2**10**7)
 
 
 class WaitingArea:
-    def __init__(self, arrival_rate: float, rel_grid: RelativeGrid, pedestrian_stop_light: StopLight, max_size: int = 100):
+    def __init__(self, arrival_rate: float, rel_grid: RelativeGrid, max_size: int = 100):
         self._rel_grid = rel_grid
         self._waiting_pedestrians = 0
         self._arrival_rate = arrival_rate
         self._total_generated_pedestrians = 0
-        self._pedestrian_stop_light = pedestrian_stop_light
         self._max_size = max_size
 
     def _generate_pedestrians(self):
@@ -28,18 +27,17 @@ class WaitingArea:
 
 
     def _can_place_pedestrian(self) -> bool:
-        width = self._rel_grid.width
-        for i in range(width):
+        for i in range(self._rel_grid.rows):
             if not self._rel_grid.is_fill(RelativePosition.right(i), ignore_opposite_direction=False):
                 return True
         return False
     
     def _place_pedestrian(self):
-        width = self._rel_grid.width
+        rows = self._rel_grid.rows
         
-        possible_pos = gen.randint(0, width)
+        possible_pos = gen.randint(0, rows)
         while self._rel_grid.is_fill(RelativePosition.right(possible_pos), ignore_opposite_direction=False):
-            possible_pos = (possible_pos + 1) % width
+            possible_pos = (possible_pos + 1) % rows
 
         pedestrian_grid = self._rel_grid.new_displaced(RelativePosition.right(possible_pos))
         self._rel_grid.fill(RelativePosition.right(possible_pos), Pedestrian(pedestrian_grid))
@@ -51,8 +49,8 @@ class WaitingArea:
 
     def update(self):
         self._generate_pedestrians()
-        if self._pedestrian_stop_light.state == "green":
-            self._place_pedestrians()
+        self._place_pedestrians()
+            
 
     def __repr__(self) -> str:
         return f"{self._waiting_pedestrians : <3}"

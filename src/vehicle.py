@@ -13,11 +13,10 @@ class Vehicle:
     self._repr = gen.choice(["🟥", "🟧", "🟨", "🟩", "🟦", "🟪", "🟫"])
     self._vel = 5
     self._crossing = False
-    self._crosswalk_zone = crosswalk_zone
     self._desired_movement = None
     # These are swapped on purpose
-    self._width = prototype.length
-    self._length = prototype.width
+    self._width = prototype.cols
+    self._length = prototype.rows
 
     self.build_grids(origin)    
     
@@ -49,17 +48,17 @@ class Vehicle:
       
     return True
 
-  def think(self, pedestrian_stop_light: StopLight):
+  def think(self, crosswalk_zone: Rectangle, pedestrian_stop_light: StopLight):
     if self._crossing or pedestrian_stop_light.is_red():
       self._desired_movement = RelativePosition.forward(self._vel)
     else:
-      dist = self.driver_pos.calc_dist_to_zone(RelativePosition.still(), self._crosswalk_zone)
+      dist = self.driver_pos.calc_dist_to_zone(RelativePosition.still(), crosswalk_zone)
       if dist is None:
         self._desired_movement = RelativePosition.forward(self._vel)
       else:
         self._desired_movement = RelativePosition.forward(min(dist, self._vel))
     
-  def move(self):
+  def move(self, crosswalk_zone: Rectangle):
     if not self.can_move():
       return
     
@@ -75,7 +74,7 @@ class Vehicle:
     if not self._desired_movement.is_still():
       self._moved = True
     if not self._crossing:
-      self._crossing = self.driver_pos.is_in(self._crosswalk_zone)
+      self._crossing = self.driver_pos.is_in(crosswalk_zone)
     
   
   def __repr__(self):
@@ -98,13 +97,13 @@ class VehiclePart:
   def facing(self):
     return self.relative_origin.facing
   
-  def think(self, _:StopLight):
+  def think(self, _: Rectangle, __:StopLight):
     pass
   
   def __repr__(self):
         return self._repr
       
-  def move(self):
+  def move(self, _: Rectangle):
     pass
   
   def remove(self):

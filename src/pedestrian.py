@@ -6,6 +6,7 @@ from generator.tp_generator import TPGenerator
 from relative_position import RelativePosition
 from directions import opposite_direction
 from stoplight import StopLight
+from rectangle import Rectangle
 
 from orientable import Orientable
 
@@ -97,8 +98,12 @@ class Pedestrian(Orientable):
         else:
             return RelativePosition.right(1)
 
-    def think(self, pedestrian_stop_light: StopLight = None):
-        if pedestrian_stop_light is not None and not pedestrian_stop_light.is_green():
+    def think(self, crosswalk_zone: Rectangle, pedestrian_stop_light: StopLight = None):
+        if pedestrian_stop_light.is_red() and not self._rel_grid.is_in(crosswalk_zone):
+            self._desired_displacement = RelativePosition.still()
+            return
+        
+        if pedestrian_stop_light is not None and pedestrian_stop_light.is_red():
             self._vel = 6
             self._repr = "😰"
 
@@ -117,7 +122,7 @@ class Pedestrian(Orientable):
             else:
                 self._desired_displacement = RelativePosition.still()
 
-    def move(self):
+    def move(self, _: Rectangle):
         if not self._rel_grid.is_inbounds(self._desired_displacement):
             self._rel_grid.clear()
             return

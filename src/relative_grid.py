@@ -29,12 +29,12 @@ class RelativeGrid(Generic[T]):
         return self._facing
     
     @property
-    def width(self) -> int:
-        return self._bounds.width
+    def rows(self) -> int:
+        return self._bounds.rows
     
     @property
-    def length(self) -> int:
-        return self._bounds.length
+    def cols(self) -> int:
+        return self._bounds.cols
     
     def is_in(self, zone: Rectangle) -> bool:
         return zone.is_inside(self._center)
@@ -62,7 +62,7 @@ class RelativeGrid(Generic[T]):
         if not self._bounds.is_inside((row, col)):
             return False
 
-        return 0 <= row < self._grid.width and 0 <= col < self._grid.length
+        return 0 <= row < self._grid.rows and 0 <= col < self._grid.cols
 
     def get_prev(self, displacement: RelativePosition, f: Callable[[T], bool] = None) -> Optional[T]:
         if f is None:

@@ -22,15 +22,15 @@ class CellAlreadyFill(Exception):
 T = TypeVar("T")
 
 class Grid(Generic[T]):
-    def __init__(self, width: int, length: int):
-        self._grid = [[None for i in range(length)] for j in range(width)]
+    def __init__(self, rows: int, cols: int):
+        self._grid = [[None for i in range(cols)] for j in range(rows)]
         self._passed_to_west = 0
         self._passed_to_east = 0
 
     def is_fill(self, row: int, col: int) -> bool:
-        if row < 0 or row >= self.width:
+        if row < 0 or row >= self.rows:
             raise Exception(f"Row {row} out of bounds")
-        if col < 0 or col >= self.length:
+        if col < 0 or col >= self.cols:
             return False
         
         return self._grid[row][col] is not None
@@ -41,16 +41,10 @@ class Grid(Generic[T]):
             self._passed_to_east += 1
         elif grid_direction == "West":
             self._passed_to_west += 1
-    
-    def is_column_full(self, col: int) -> bool:
-        for i in range(self.width):
-            if not self.is_fill(i, col):
-                return False
-        return True
-    
+
     def show(self):
         print(f"{'': ^2}", end="")
-        for i in range(self.length):
+        for i in range(self.cols):
             # if even, print with color red, else print with color blue
             if i % 2 == 0:
                 print("\033[91m", end="")
@@ -61,15 +55,15 @@ class Grid(Generic[T]):
         print()
         for i in range(END_ROW):
 
-            if i < CROSSWALK_START_ROW:
-                continue
+            # if i < CROSSWALK_START_ROW:
+            #    continue
             if i % 2 == 0:
                 print("\033[91m", end="")
             else:
                 print("\033[94m", end="")
             print(f"{i: ^2}", end="")
             print("\033[0m", end="")
-            for j in range(self.length):
+            for j in range(self.cols):
                 if self.is_fill(i, j):
                     value = self._grid[i][j]
                     if value.__class__.__name__ == "Pedestrian":
@@ -106,18 +100,18 @@ class Grid(Generic[T]):
         return self._grid[row][col]
 
     @property
-    def width(self):
+    def rows(self):
         return len(self._grid)
 
     @property
-    def length(self):
+    def cols(self):
         return len(self._grid[0])
 
     def calc_dist_to_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
         if f is None:
             f = lambda x: True
 
-        for i in range(col+1, self.length):
+        for i in range(col+1, self.cols):
             if self.is_fill(row, i) and f(self.get_value(row, i)):
                 return i - col - 1
         return None
@@ -135,7 +129,7 @@ class Grid(Generic[T]):
         if f is None:
             f = lambda x: True
 
-        for i in range(row+1, self.width):
+        for i in range(row+1, self.rows):
             if self.is_fill(i, col) and f(self.get_value(i, col)):
                 return i - row - 1
         return None
@@ -148,8 +142,6 @@ class Grid(Generic[T]):
             if self.is_fill(i, col) and f(self.get_value(i, col)):
                 return row - i - 1
         return None
-
-
     
     def get_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
         dist = self.calc_dist_to_prev(row, col, f)
@@ -176,7 +168,7 @@ class Grid(Generic[T]):
         return self.get_value(row + dist + 1, col)
     
     def apply(self, f: Callable[[T, Tuple[int, int]], None]):
-        remaining_cells = [(i, j) for i in range(self.width) for j in range(self.length)]
+        remaining_cells = [(i, j) for i in range(self.rows) for j in range(self.cols)]
 
         while len(remaining_cells) > 0:
             cell = gen.choice(remaining_cells)
