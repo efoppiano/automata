@@ -1,6 +1,6 @@
 from typing import Tuple, TypeVar, Generic, Optional, Callable
 
-from grid import Grid, CellAlreadyFill
+from .grid import Grid, CellAlreadyFill
 
 from generator.tp_generator import TPGenerator
 

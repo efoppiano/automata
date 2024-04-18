@@ -1,13 +1,13 @@
 from typing import Tuple
 
-from grid import Grid, CellAlreadyFill
-from relative_grid import RelativeGrid
+from grid.grid import Grid, CellAlreadyFill
+from grid.relative_grid import RelativeGrid
 from rectangle import Rectangle
-from pedestrian import Pedestrian
-from waiting_area import WaitingArea
+from pedestrian.pedestrian import Pedestrian
+from pedestrian.waiting_area import WaitingArea
 from generator.tp_generator import TPGenerator
 from stoplight import StopLight
-from vehicle_lane import VehicleLane
+from vehicle.vehicle_lane import VehicleLane
 
 gen = TPGenerator(9*10**7)
 

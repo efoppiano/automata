@@ -1,7 +1,5 @@
-from typing import Union
-
-from grid import Direction
-from relative_grid import RelativeGrid
+from directions import Direction
+from grid.relative_grid import RelativeGrid
 from generator.tp_generator import TPGenerator
 from relative_position import RelativePosition
 from directions import opposite_direction

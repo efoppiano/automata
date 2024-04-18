@@ -1,9 +1,6 @@
-from typing import TypeVar
-
-from pedestrian import Pedestrian
+from pedestrian.pedestrian import Pedestrian
 from generator.tp_generator import TPGenerator
-from stoplight import StopLight
-from relative_grid import RelativeGrid
+from grid.relative_grid import RelativeGrid
 from relative_position import RelativePosition
 
 gen = TPGenerator(2**10**7)
