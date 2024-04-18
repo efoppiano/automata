@@ -8,6 +8,8 @@ gen = TPGenerator(4*10**7)
 CROSSWALK_START_ROW = 6
 CROSSWALK_END_ROW = CROSSWALK_START_ROW+8
 
+END_ROW = 19
+
 class CellAlreadyFill(Exception):
     def __init__(self, row: int, col: int, v = None):
         self.row = row
@@ -47,12 +49,26 @@ class Grid(Generic[T]):
         return True
     
     def show(self):
-        print(f"{'': ^3}", end="")
+        print(f"{'': ^2}", end="")
         for i in range(self.length):
-            print(f"{i: ^3}", end="")
+            # if even, print with color red, else print with color blue
+            if i % 2 == 0:
+                print("\033[91m", end="")
+            else:
+                print("\033[94m", end="")
+            print(f"{i: >2}", end="")
+            print("\033[0m", end="")
         print()
-        for i in range(self.width):
-            print(f"{i: ^3}", end="")
+        for i in range(END_ROW):
+
+            if i < CROSSWALK_START_ROW:
+                continue
+            if i % 2 == 0:
+                print("\033[91m", end="")
+            else:
+                print("\033[94m", end="")
+            print(f"{i: ^2}", end="")
+            print("\033[0m", end="")
             for j in range(self.length):
                 if self.is_fill(i, j):
                     value = self._grid[i][j]
