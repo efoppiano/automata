@@ -36,6 +36,9 @@ class RelativeGrid(Generic[T]):
     def length(self) -> int:
         return self._bounds.length
     
+    def is_in(self, zone: Rectangle) -> bool:
+        return zone.is_inside(self._center)
+    
     def fill(self, displacement: RelativePosition, obj: T):
         if not self.is_inbounds(displacement):
             raise Exception(f"Attempted to fill an out of bounds cell {displacement.apply(self._facing, self._center)} - Bounds: {self._bounds}")
@@ -102,6 +105,10 @@ class RelativeGrid(Generic[T]):
             return self._grid.calc_dist_to_vertically_prev(row, col, f)
         elif self._facing == "South":
             return self._grid.calc_dist_to_vertically_next(row, col, f)
+        
+    def calc_dist_to_zone(self, displacement: RelativePosition, zone: Rectangle) -> Optional[int]:
+        row, col = displacement.apply(self._facing, self._center)
+        return zone.distance_to((row, col))
 
     def clear(self, displacement: RelativePosition):
         row, col = displacement.apply(self._facing, self._center)

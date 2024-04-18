@@ -25,6 +25,9 @@ class StopLight:
     def is_green(self) -> bool:
         return self._state == "green"
     
+    def is_red(self) -> bool:
+        return self._state == "red"
+
     def show(self):
         if self._state == "green":
             print("🟢", self._time_to_change)

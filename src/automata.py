@@ -14,7 +14,7 @@ gen = TPGenerator(9*10**7)
 class Automata:
     def __init__(self, crosswalk_rows: int, crosswalk_cols: int):
         crosswalk_prototype = Rectangle(crosswalk_cols, crosswalk_rows)
-        vehicle_lane_prototype = Rectangle(7, 2*6+crosswalk_prototype.width)
+        vehicle_lane_prototype = Rectangle(7, 3*6+crosswalk_prototype.width)
         waiting_area_prototype = Rectangle(0, crosswalk_rows)
         car_prototype = Rectangle(5, 6)
 
@@ -23,25 +23,22 @@ class Automata:
         self._grid = Grid[Pedestrian](total_rows, total_cols)
         self._pedestrian_stop_light = StopLight(90, 45, "green")
 
-        self.build_vehicle_lanes(crosswalk_prototype, 
-                                 car_prototype, 
-                                 vehicle_lane_prototype, 
-                                 waiting_area_prototype)
-        self.build_crosswalk(crosswalk_prototype, waiting_area_prototype, vehicle_lane_prototype)
-
-        self._moved_pedestrians = set()
-
-    def build_crosswalk(self,
-                        crosswalk_prototype: Rectangle,
-                        waiting_area_prototype: Rectangle,
-                        vehicle_lane_prototype: Rectangle):
         crosswalk = crosswalk_prototype.duplicate()
         crosswalk.move_right(waiting_area_prototype.length)
         crosswalk.move_down(6)
-        print(f"Pedestrian zone: {crosswalk}")
-        
-        grid_area_west = RelativeGrid(crosswalk.upper_left, crosswalk, "East", self._grid)
-        grid_area_east = RelativeGrid(crosswalk.lower_right, crosswalk, "West", self._grid)
+        self._crosswalk_zone = crosswalk
+
+        self.build_vehicle_lanes(self._crosswalk_zone, 
+                                 car_prototype, 
+                                 vehicle_lane_prototype, 
+                                 waiting_area_prototype)
+        self.build_waiting_areas(self._crosswalk_zone)
+
+        self._moved_pedestrians = set()
+
+    def build_waiting_areas(self, crosswalk_zone: Rectangle):
+        grid_area_west = RelativeGrid(crosswalk_zone.upper_left, crosswalk_zone, "East", self._grid)
+        grid_area_east = RelativeGrid(crosswalk_zone.lower_right, crosswalk_zone, "West", self._grid)
 
         self._waiting_area_west = WaitingArea(1000/3600, grid_area_west, self._pedestrian_stop_light)
         self._waiting_area_east = WaitingArea(1000/3600, grid_area_east, self._pedestrian_stop_light)
@@ -49,11 +46,11 @@ class Automata:
 
 
     def build_vehicle_lanes(self,
-                            crosswalk_prototype: Rectangle,
+                            crosswalk_zone: Rectangle,
                             car_prototype: Rectangle,
                             car_lane_zone_prototype: Rectangle,
                             waiting_area_prototype: Rectangle):
-        car_lanes_amount = crosswalk_prototype.length // car_lane_zone_prototype.length
+        car_lanes_amount = crosswalk_zone.length // car_lane_zone_prototype.length
         waiting_area_length = waiting_area_prototype.length
 
         self._car_lanes = []
@@ -61,12 +58,12 @@ class Automata:
             car_lane_zone = car_lane_zone_prototype.duplicate()
             car_lane_zone.move_right(waiting_area_length + i*car_lane_zone_prototype.length)
             grid_car_lane = RelativeGrid(car_lane_zone.lower_left, car_lane_zone, "North", self._grid)
-            self._car_lanes.append(VehicleLane(500/3600, car_prototype.length, car_prototype.width, self._pedestrian_stop_light, grid_car_lane))
+            self._car_lanes.append(VehicleLane(1400/(6*3600), car_prototype, crosswalk_zone, self._pedestrian_stop_light, grid_car_lane))
         for i in range(car_lanes_amount//2):
             car_lane_zone = car_lane_zone_prototype.duplicate()
             car_lane_zone.move_right(waiting_area_length + i*car_lane_zone_prototype.length)
             grid_car_lane = RelativeGrid(car_lane_zone.upper_right, car_lane_zone, "South", self._grid)
-            self._car_lanes.append(VehicleLane(500/3600, car_prototype.length, car_prototype.width, self._pedestrian_stop_light, grid_car_lane))
+            self._car_lanes.append(VehicleLane(1400/(6*3600), car_prototype, crosswalk_zone, self._pedestrian_stop_light, grid_car_lane))
 
     def update(self):
         self._pedestrian_stop_light.update()

@@ -8,14 +8,19 @@ from stoplight import StopLight
 from relative_position import RelativePosition
 from directions import Direction
 from vehicle import Vehicle
+from rectangle import Rectangle
 
 gen = TPGenerator(3*10**6)
 
 class VehicleLane:
-    def __init__(self, arrival_rate: int, vehicle_width: int, vehicle_length: int, 
-                 pedestrian_stop_light: StopLight, rel_grid: RelativeGrid):
-        self._vehicle_width = vehicle_width
-        self._vehicle_length = vehicle_length
+    def __init__(self,
+                 arrival_rate: int,
+                 vehicle_prototype: Rectangle, 
+                 crosswalk_zone: Rectangle,
+                 pedestrian_stop_light: StopLight,
+                 rel_grid: RelativeGrid):
+        self._vehicle_prototype = vehicle_prototype
+        self._crosswalk_zone = crosswalk_zone
         self._rel_grid = rel_grid
         self._waiting_vehicles = 0
         self._arrival_rate = arrival_rate
@@ -31,7 +36,7 @@ class VehicleLane:
     def _can_place_vehicle(self) -> bool:
         for i in range(self._rel_grid.length):
             dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.right(i))
-            if dist_to_next is not None and dist_to_next < self._vehicle_length:
+            if dist_to_next is not None and dist_to_next < self._vehicle_prototype.width:
                 return False
         return True
     
@@ -39,17 +44,11 @@ class VehicleLane:
         if self._waiting_vehicles == 0 or not self._can_place_vehicle():
             return
         
-        offset = (self._rel_grid.length - self._vehicle_width) // 2
-        # print(f"Offset: {offset}")
+        offset = (self._rel_grid.length - self._vehicle_prototype.length) // 2
         
-        vehicle_pos = self._rel_grid.new_displaced(RelativePosition.right(offset))
-        Vehicle(vehicle_pos, self._vehicle_width, self._vehicle_length)
+        vehicle_origin = self._rel_grid.new_displaced(RelativePosition.right(offset))
+        Vehicle(vehicle_origin, self._crosswalk_zone, self._vehicle_prototype)
         
-        # for i in range(offset, offset + self._vehicle_width):
-        #     for j in range(self._vehicle_length):
-        #         value = "V" if self._rel_grid.facing == "South" else "^"
-        #         self._rel_grid.fill(RelativePosition.right(i) + RelativePosition.forward(j), value)
-
     def update(self):
         self._generate_vehicle()
         self._place_vehicle()

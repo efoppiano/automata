@@ -57,3 +57,17 @@ class Rectangle:
     
     def duplicate(self):
         return Rectangle(self.length, self.width)
+    
+    def distance_to(self, point: Point) -> int:
+        x, y = point
+        x1, y1 = self._upper_left
+        x2, y2 = self._lower_right
+        if x1 <= x <= x2:
+            dist = min(abs(y - y1), abs(y - y2)) - 1
+            return dist
+        if y1 <= y <= y2:
+            dist = min(abs(x - x1), abs(x - x2)) - 1
+            return dist
+        raise ValueError(f"Cannot calculate distance to point {point} from rectangle {self}")
+            
+        return 0
