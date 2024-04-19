@@ -5,13 +5,13 @@ from relative_position import RelativePosition
 from stoplight import StopLight
 from generator.tp_generator import TPGenerator
 from rectangle import Rectangle
-from orientable import Orientable
+from road_entity import RoadEntity
 
 gen = TPGenerator(4 * 10 ** 7)
 
 
-class Vehicle(Orientable):
-    def __init__(self, origin: RelativeGrid, prototype: Rectangle):
+class Vehicle(RoadEntity):
+    def __init__(self, origin: RelativeGrid[RoadEntity], prototype: Rectangle):
         self._repr = gen.choice(["🟥", "🟧", "🟨", "🟩", "🟦", "🟪", "🟫"])
         self._vel = 5
         self._crossing = False
@@ -21,8 +21,8 @@ class Vehicle(Orientable):
 
         self.build_grids(origin)
 
-    def build_grids(self, origin: RelativeGrid):
-        self.relative_origins: List[RelativeGrid] = []
+    def build_grids(self, origin: RelativeGrid[RoadEntity]):
+        self.relative_origins: List[RelativeGrid[RoadEntity]] = []
         for i in range(self._width):
             for j in range(self._length):
                 origin_ij = origin.new_displaced(
@@ -39,8 +39,12 @@ class Vehicle(Orientable):
             part = VehiclePart(self, rel_grid_i, self._repr)
             rel_grid_i.fill(RelativePosition.still(), part)
 
+    @property
     def facing(self):
         return self.driver_pos.facing
+    
+    def is_crossing(self) -> bool:
+        return self._crossing
 
     def can_move(self) -> bool:
         for i in range(self._width):
@@ -87,8 +91,8 @@ class Vehicle(Orientable):
             rel_grid_i.clear()
 
 
-class VehiclePart:
-    def __init__(self, parent: Vehicle, relative_origin: RelativeGrid, repr: str):
+class VehiclePart(RoadEntity):
+    def __init__(self, parent: Vehicle, relative_origin: RelativeGrid[RoadEntity], repr: str):
         self.parent = parent
         self.relative_origin = relative_origin
         self._repr = repr
@@ -97,6 +101,9 @@ class VehiclePart:
     @property
     def facing(self):
         return self.relative_origin.facing
+    
+    def is_crossing(self) -> bool:
+        return self.parent.is_crossing
 
     def think(self, _: Rectangle, __: StopLight):
         pass

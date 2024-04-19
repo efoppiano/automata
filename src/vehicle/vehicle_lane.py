@@ -3,11 +3,13 @@ from grid.relative_grid import RelativeGrid
 from generator.tp_generator import TPGenerator
 from stoplight import StopLight
 
-from relative_position import RelativePosition
+from relative_position import forward, right, still
 from directions import Direction
 from vehicle.vehicle import Vehicle
 from rectangle import Rectangle
 from config import Config
+
+from road_entity import RoadEntity
 
 gen = TPGenerator(3 * 10 ** 6)
 
@@ -15,7 +17,7 @@ gen = TPGenerator(3 * 10 ** 6)
 class VehicleLane:
     def __init__(self,
                  config: Config,
-                 rel_grid: RelativeGrid):
+                 rel_grid: RelativeGrid[RoadEntity]):
         self._config = config
         self._rel_grid = rel_grid
         self._waiting_vehicles = 0
@@ -29,7 +31,7 @@ class VehicleLane:
 
     def _can_place_vehicle(self) -> bool:
         for i in range(self._rel_grid.cols):
-            dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.right(i))
+            dist_to_next = self._rel_grid.calc_dist_to_next(right(i))
             if dist_to_next is not None and dist_to_next < self._config.vehicle_prot.rows:
                 return False
         return True
@@ -40,7 +42,7 @@ class VehicleLane:
 
         offset = (self._rel_grid.cols - self._config.vehicle_prot.cols) // 2
 
-        vehicle_grid = self._rel_grid.new_displaced(RelativePosition.right(offset))
+        vehicle_grid = self._rel_grid.new_displaced(right(offset))
         Vehicle(vehicle_grid, self._config.vehicle_prot)
 
     def update(self):

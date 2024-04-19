@@ -9,7 +9,7 @@ class StopLight:
 
         self._cycle = cycle
         self._green_light_time = green_light_time
-        self._time_to_change = green_light_time
+        self._time_to_change = green_light_time if initial_state == "green" else cycle - green_light_time
         self._state = initial_state
 
     def update(self):

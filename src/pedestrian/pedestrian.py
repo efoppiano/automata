@@ -1,17 +1,17 @@
 from directions import Direction
 from grid.relative_grid import RelativeGrid
 from generator.tp_generator import TPGenerator
-from relative_position import RelativePosition
+from relative_position import forward, left, right, still, RelativePosition
 from directions import opposite_direction
 from stoplight import StopLight
 from rectangle import Rectangle
 
-from orientable import Orientable
+from road_entity import RoadEntity
 
 gen = TPGenerator(4*10**7)
 
-class Pedestrian(Orientable):
-    def __init__(self, rel_grid: RelativeGrid, velocity: int = None, repr: str = None):
+class Pedestrian(RoadEntity):
+    def __init__(self, rel_grid: RelativeGrid[RoadEntity], velocity: int = None, repr: str = None):
         self._desired_displacement = None
         self._rel_grid = rel_grid
         self._crossing = False
@@ -30,6 +30,9 @@ class Pedestrian(Orientable):
     def facing(self) -> Direction:
         return self._rel_grid.facing
     
+    def is_crossing(self) -> bool:
+        return self._crossing
+
     def __repr__(self):
         return self._repr
 
@@ -48,62 +51,60 @@ class Pedestrian(Orientable):
             return 2
 
     def can_move_forward(self) -> bool:
-        dist_to_next =  self._rel_grid.calc_dist_to_next(RelativePosition.still(),
-                                                         lambda obj: (obj.facing == opposite_direction(self.facing)\
-                                                                      or obj.facing == self.facing) and obj._crossing)
+        dist_to_next =  self._rel_grid.calc_dist_to_next(still(), lambda ent: ent.is_crossing())
         return dist_to_next is None or dist_to_next > 1
     
     def can_move_left(self) -> bool:
-        if not self._rel_grid.is_inbounds(RelativePosition.left(1)):
+        if not self._rel_grid.is_inbounds(left(1)):
             return False
         
-        if self._rel_grid.is_fill(RelativePosition.left(1), False):
+        if self._rel_grid.is_fill(left(1), False):
             return False
         
-        prev = self._rel_grid.get_prev(RelativePosition.left(1),
+        prev = self._rel_grid.get_prev(left(1),
                                        lambda obj: obj.facing == self.facing)
         if prev is None or self.is_faster_than(prev):
             return True
         
-        dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.left(1))
+        dist_to_next = self._rel_grid.calc_dist_to_next(left(1))
         return dist_to_next is None or dist_to_next > self._vel
     
     def can_move_right(self) -> bool:
-        if not self._rel_grid.is_inbounds(RelativePosition.right(1)):
+        if not self._rel_grid.is_inbounds(right(1)):
             return False
         
-        if self._rel_grid.is_fill(RelativePosition.right(1), False):
+        if self._rel_grid.is_fill(right(1), False):
             return False
         
-        prev = self._rel_grid.get_prev(RelativePosition.right(1),
+        prev = self._rel_grid.get_prev(right(1),
                                        lambda obj: obj.facing == self.facing)
         if prev is None or self.is_faster_than(prev):
             return True
         
-        dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.right(1))
+        dist_to_next = self._rel_grid.calc_dist_to_next(right(1))
         return dist_to_next is None or dist_to_next > self._vel
     
     def is_faster_than(self, other: 'Pedestrian') -> bool:
         return self._vel > other._vel
     
     def _get_pos_forward(self) -> RelativePosition:
-        dist_to_next = self._rel_grid.calc_dist_to_next(RelativePosition.still(),
+        dist_to_next = self._rel_grid.calc_dist_to_next(still(),
                                                         lambda obj: obj.facing != opposite_direction(self.facing))
         if dist_to_next is None or dist_to_next > self._vel:
-            return RelativePosition.forward(self._vel)
-        return RelativePosition.forward(dist_to_next)
+            return forward(self._vel)
+        return forward(dist_to_next)
     
     def _get_pos_left_right_random(self) -> RelativePosition:
         p = gen.random()
         if p > 0.5:
-            return RelativePosition.left(1)
+            return left(1)
         else:
-            return RelativePosition.right(1)
+            return right(1)
 
     def think(self, crosswalk_zone: Rectangle, pedestrian_stop_light: StopLight):
         if pedestrian_stop_light.is_red():
             if not self._rel_grid.is_in(crosswalk_zone):
-                self._desired_displacement = RelativePosition.still()
+                self._desired_displacement = still()
                 return
             else:
                 self._vel = 6
@@ -116,13 +117,13 @@ class Pedestrian(Orientable):
             can_move_right = self.can_move_right()
             
             if can_move_left and not can_move_right:
-                self._desired_displacement = RelativePosition.left(1)
+                self._desired_displacement = left(1)
             elif can_move_right and not can_move_left:
-                self._desired_displacement = RelativePosition.right(1)
+                self._desired_displacement = right(1)
             elif can_move_left and can_move_right:
                 self._desired_displacement = self._get_pos_left_right_random()
             else:
-                self._desired_displacement = RelativePosition.still()
+                self._desired_displacement = still()
 
     def move(self, crosswalk_zone: Rectangle):
         if not self._rel_grid.is_inbounds(self._desired_displacement):
