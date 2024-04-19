@@ -51,6 +51,10 @@ class Vehicle(Orientable):
         return True
 
     def think(self, crosswalk_zone: Rectangle, pedestrian_stop_light: StopLight):
+        if not self._crossing and pedestrian_stop_light.is_yellow():
+            self._desired_movement = RelativePosition.still()
+            return
+        
         if self._crossing or pedestrian_stop_light.is_red():
             self._desired_movement = RelativePosition.forward(self._vel)
         else:
