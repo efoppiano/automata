@@ -4,16 +4,13 @@ from abc import ABC, abstractmethod
 from grid.relative_grid import RelativeGrid
 from relative_position import forward, right, still
 from stoplight import StopLight
-from generator.tp_generator import TPGenerator
+from generator.tp_generator import choice
 from rectangle import Rectangle
 from road_entity import RoadEntity
 
-gen = TPGenerator(4 * 10 ** 7)
-
-
 class Vehicle(RoadEntity, ABC):
     def __init__(self, origin: RelativeGrid[RoadEntity], prototype: Rectangle):
-        self._repr = gen.choice(["🟥", "🟧", "🟨", "🟩", "🟦", "🟪", "🟫"])
+        self._repr = choice(["🟥", "🟧", "🟨", "🟩", "🟦", "🟪", "🟫"])
         self._vel = 5
         self._crossing = False
         self._desired_movement = still()

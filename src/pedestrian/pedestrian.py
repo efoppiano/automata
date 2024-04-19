@@ -1,14 +1,12 @@
 from directions import Direction
 from grid.relative_grid import RelativeGrid
-from generator.tp_generator import TPGenerator
+from generator.tp_generator import random, choice
 from relative_position import forward, left, right, still, RelativePosition
 from directions import opposite_direction
 from stoplight import StopLight
 from rectangle import Rectangle
 
 from road_entity import RoadEntity
-
-gen = TPGenerator(4*10**7)
 
 class Pedestrian(RoadEntity):
     def __init__(self, rel_grid: RelativeGrid[RoadEntity], velocity: int = None, repr: str = None):
@@ -24,7 +22,7 @@ class Pedestrian(RoadEntity):
         if repr is not None:
             self._repr = repr
         else:
-            self._repr = gen.choice(["😀", "😁", "🙃", "🤔", "😶", "🙄", "😎"])
+            self._repr = choice(["😀", "😁", "🙃", "🤔", "😶", "🙄", "😎"])
 
     @property
     def facing(self) -> Direction:
@@ -40,7 +38,7 @@ class Pedestrian(RoadEntity):
         return self._repr
 
     def _generate_velocity(self) -> int:
-        p = gen.random()
+        p = random()
         
         if p > 0.978:
             return 6
@@ -98,7 +96,7 @@ class Pedestrian(RoadEntity):
         return forward(dist_to_next)
     
     def _get_pos_left_right_random(self) -> RelativePosition:
-        p = gen.random()
+        p = random()
         if p > 0.5:
             return left(1)
         else:

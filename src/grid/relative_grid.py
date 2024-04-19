@@ -1,8 +1,7 @@
-from typing import Tuple, TypeVar, Generic, Optional, Callable
+from typing import TypeVar, Generic, Optional, Callable
 
 from .grid import Grid, CellAlreadyFill
 
-from generator.tp_generator import TPGenerator
 
 from directions import Direction, opposite_direction
 from relative_position import RelativePosition
@@ -10,8 +9,6 @@ from rectangle import Point, Rectangle
 from orientable import Orientable
 
 T = TypeVar("T", bound=Orientable)
-
-gen = TPGenerator(3**10**7)
 
 class RelativeGrid(Generic[T]):
     def __init__(self, center: Point, bounds: Rectangle, facing: Direction, grid: Grid[T]):

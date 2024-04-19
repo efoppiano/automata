@@ -1,12 +1,10 @@
 from typing import Optional
 
 from pedestrian.pedestrian import Pedestrian
-from generator.tp_generator import TPGenerator
+from generator.tp_generator import poi, randint
 from grid.relative_grid import RelativeGrid
 from relative_position import right
 from stoplight import StopLight
-
-gen = TPGenerator(2**10**7)
 
 
 class WaitingArea:
@@ -21,7 +19,7 @@ class WaitingArea:
         if self._waiting_pedestrians == self._max_size:
             return
         
-        new_pedestrians = min(self._max_size - self._waiting_pedestrians, gen.poi(self._arrival_rate))
+        new_pedestrians = min(self._max_size - self._waiting_pedestrians, poi(self._arrival_rate))
         self._waiting_pedestrians += new_pedestrians
         self._total_generated_pedestrians += new_pedestrians
 
@@ -35,7 +33,7 @@ class WaitingArea:
     def _place_pedestrian(self):
         rows = self._rel_grid.rows
         
-        possible_pos = gen.randint(0, rows)
+        possible_pos = randint(0, rows)
         while self._rel_grid.is_fill(right(possible_pos), ignore_opposite_direction=False):
             possible_pos = (possible_pos + 1) % rows
 

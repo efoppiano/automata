@@ -2,17 +2,14 @@ from abc import ABC, abstractmethod
 
 from grid.relative_grid import RelativeGrid
 
-from generator.tp_generator import TPGenerator
+from generator.tp_generator import poi
 
-from relative_position import forward, right, still
+from relative_position import right
 from directions import Direction
-from vehicle.vehicle import Vehicle
 from rectangle import Rectangle
 from config import Config
 
 from road_entity import RoadEntity
-
-gen = TPGenerator(3 * 10 ** 6)
 
 
 class VehicleLane(ABC):
@@ -28,7 +25,7 @@ class VehicleLane(ABC):
         pass
 
     def _generate_vehicle(self):
-        self._waiting_vehicles += gen.poi(self._config.vehicle_arrival_rate)
+        self._waiting_vehicles += poi(self._config.vehicle_arrival_rate)
 
     @property
     def facing(self) -> Direction:

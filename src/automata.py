@@ -1,19 +1,15 @@
 from typing import Tuple, List
 
-from grid.grid import Grid, CellAlreadyFill
+from grid.grid import Grid
 from grid.relative_grid import RelativeGrid
 from rectangle import Rectangle
-from pedestrian.pedestrian import Pedestrian
 from pedestrian.waiting_area import WaitingArea
-from generator.tp_generator import TPGenerator
 from road_entity import RoadEntity
 from vehicle.turning_vehicle_lane import TurningVehicleLane
 from vehicle.straight_vehicle_lane import StraightVehicleLane
 from vehicle.vehicle_lane import VehicleLane
 from config import Config
 from plotter import Plotter
-
-gen = TPGenerator(9*10**7)
 
 class Automata:
     def __init__(self):

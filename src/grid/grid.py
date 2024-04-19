@@ -1,15 +1,8 @@
 from typing import TypeVar, Generic, Optional, Callable, Tuple
 
-from generator.tp_generator import TPGenerator
+from generator.tp_generator import choice
 from directions import Direction
 from rectangle import Point, Rectangle
-
-gen = TPGenerator(4*10**7)
-
-CROSSWALK_START_ROW = 6
-CROSSWALK_END_ROW = CROSSWALK_START_ROW+8
-
-END_ROW = 19
 
 class CellAlreadyFill(Exception):
     def __init__(self, row: int, col: int, v = None):
@@ -171,7 +164,7 @@ class Grid(Generic[T]):
         remaining_cells = [(i, j) for i in range(self.rows) for j in range(self.cols)]
 
         while len(remaining_cells) > 0:
-            cell = gen.choice(remaining_cells)
+            cell = choice(remaining_cells)
             remaining_cells.remove(cell)
             i, j = cell
             if self.is_fill(i, j):
