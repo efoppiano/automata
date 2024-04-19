@@ -1,7 +1,8 @@
+from abc import ABC, abstractmethod
+
 from grid.relative_grid import RelativeGrid
 
 from generator.tp_generator import TPGenerator
-from stoplight import StopLight
 
 from relative_position import forward, right, still
 from directions import Direction
@@ -14,13 +15,17 @@ from road_entity import RoadEntity
 gen = TPGenerator(3 * 10 ** 6)
 
 
-class VehicleLane:
+class VehicleLane(ABC):
     def __init__(self,
                  config: Config,
                  rel_grid: RelativeGrid[RoadEntity]):
         self._config = config
         self._rel_grid = rel_grid
         self._waiting_vehicles = 0
+
+    @abstractmethod
+    def spawn_vehicle(self, vehicle_grid: RelativeGrid[RoadEntity], vehicle_prot: Rectangle):
+        pass
 
     def _generate_vehicle(self):
         self._waiting_vehicles += gen.poi(self._config.vehicle_arrival_rate)
@@ -43,7 +48,7 @@ class VehicleLane:
         offset = (self._rel_grid.cols - self._config.vehicle_prot.cols) // 2
 
         vehicle_grid = self._rel_grid.new_displaced(right(offset))
-        Vehicle(vehicle_grid, self._config.vehicle_prot)
+        self.spawn_vehicle(vehicle_grid, self._config.vehicle_prot)
 
     def update(self):
         self._generate_vehicle()

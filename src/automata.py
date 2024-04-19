@@ -7,6 +7,8 @@ from pedestrian.pedestrian import Pedestrian
 from pedestrian.waiting_area import WaitingArea
 from generator.tp_generator import TPGenerator
 from stoplight import StopLight
+from vehicle.turning_vehicle_lane import TurningVehicleLane
+from vehicle.straight_vehicle_lane import StraightVehicleLane
 from vehicle.vehicle_lane import VehicleLane
 from config import Config
 from plotter import Plotter
@@ -63,7 +65,10 @@ class Automata:
                 origin = vehicle_lane_zone.lower_left
             
             grid = RelativeGrid(origin, vehicle_lane_zone, facing, self._grid)
-            vehicle_lane = VehicleLane(self._config, grid)
+            if i == 0 or i == vehicle_lanes_amount - 1:
+                vehicle_lane = TurningVehicleLane(self._config, grid)
+            else:
+                vehicle_lane = StraightVehicleLane(self._config, grid)
             self._vehicle_lanes.append(vehicle_lane)
 
     def update(self):
