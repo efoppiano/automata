@@ -12,7 +12,7 @@ gen = TPGenerator(4*10**7)
 
 class Pedestrian(RoadEntity):
     def __init__(self, rel_grid: RelativeGrid[RoadEntity], velocity: int = None, repr: str = None):
-        self._desired_displacement = None
+        self._desired_displacement = still()
         self._rel_grid = rel_grid
         self._crossing = False
 
@@ -30,6 +30,9 @@ class Pedestrian(RoadEntity):
     def facing(self) -> Direction:
         return self._rel_grid.facing
     
+    def is_vehicle(self) -> bool:
+        return False
+
     def is_crossing(self) -> bool:
         return self._crossing
 
@@ -125,18 +128,21 @@ class Pedestrian(RoadEntity):
             else:
                 self._desired_displacement = still()
 
-    def move(self, crosswalk_zone: Rectangle):
+    # Return True if a conflict is encountered between the pedestrian and a vehicle
+    def move(self, crosswalk_zone: Rectangle) -> bool:
         if not self._rel_grid.is_inbounds(self._desired_displacement):
             self._rel_grid.clear()
-            return
-        
-        while self._rel_grid.is_fill(self._desired_displacement, False):
+            return False
+        conflict_happend = False
+        while not self._desired_displacement.is_still() and self._rel_grid.is_fill(self._desired_displacement, False):
+            entity = self._rel_grid.get(self._desired_displacement)
+            if entity.is_vehicle():
+                conflict_happend = True
             self._desired_displacement.decrease()
-            if self._desired_displacement.is_still():
-                return
+
         self._rel_grid.move(self._desired_displacement)
-        if not self._rel_grid.is_in(crosswalk_zone):
+        if self._crossing and not self._rel_grid.is_in(crosswalk_zone):
             self._rel_grid.clear()
-            return
         if not self._crossing:
             self._crossing = self._rel_grid.is_in(crosswalk_zone)
+        return conflict_happend

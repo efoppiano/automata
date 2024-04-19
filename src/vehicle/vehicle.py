@@ -16,7 +16,7 @@ class Vehicle(RoadEntity, ABC):
         self._repr = gen.choice(["🟥", "🟧", "🟨", "🟩", "🟦", "🟪", "🟫"])
         self._vel = 5
         self._crossing = False
-        self._desired_movement = None
+        self._desired_movement = still()
         self._width = prototype.cols
         self._length = prototype.rows
 
@@ -30,7 +30,7 @@ class Vehicle(RoadEntity, ABC):
                     right(i) + forward(j)
                 )
                 if i == 0 and j == self._length - 1:
-                    self.driver_pos = origin_ij
+                    self.driver_pos: RelativeGrid[RoadEntity] = origin_ij
                 else:
                     self.relative_origins.insert(0,
                                                  origin_ij)  # We will want to move the last ones first as they're in front
@@ -44,6 +44,9 @@ class Vehicle(RoadEntity, ABC):
     def facing(self):
         return self.driver_pos.facing
     
+    def is_vehicle(self) -> bool:
+        return True
+    
     def is_crossing(self) -> bool:
         return self._crossing
 
@@ -55,34 +58,49 @@ class Vehicle(RoadEntity, ABC):
 
         return True
 
+    def is_pedestrian_ahead(self) -> bool:
+        for i in range(self._width):
+            entity = self.driver_pos.get_next(right(i))
+            if entity is not None and not entity.is_vehicle():
+                return True
+        return False
+    
+    def is_vehicle_ahead(self) -> bool:
+        for i in range(self._width):
+            entity = self.driver_pos.get_next(right(i))
+            if entity is not None and entity.is_vehicle():
+                return True
+        return False
+
     @abstractmethod
     def think(self, crosswalk_zone: Rectangle, pedestrian_stop_light: StopLight):
-        if self._crossing or pedestrian_stop_light.is_red():
-            self._desired_movement = forward(self._vel)
-        else:
-            dist = self.driver_pos.calc_dist_to_zone(still(), crosswalk_zone)
-            if dist is None:
-                self._desired_movement = forward(self._vel)
-            else:
-                self._desired_movement = forward(min(dist, self._vel))
+        pass
 
-    def move(self, crosswalk_zone: Rectangle):
-        if not self.can_move():
-            return
+    def move(self, crosswalk_zone: Rectangle) -> bool:
+        if self._desired_movement.is_still():
+            return False
+        
+        if self.is_pedestrian_ahead():
+            for rel_grid_i in self.relative_origins:
+                if rel_grid_i.new_displaced(self._desired_movement).is_in(crosswalk_zone):
+                    return True
+            return False
+        
+        if self.is_vehicle_ahead():
+            return False
 
         if not self.driver_pos.is_inbounds(self._desired_movement):
             self.remove()
-            return
+            return False
 
         self.driver_pos.move(self._desired_movement)
 
         for rel_grid_i in self.relative_origins:
             rel_grid_i.move(self._desired_movement)
 
-        if not self._desired_movement.is_still():
-            self._moved = True
         if not self._crossing:
             self._crossing = self.driver_pos.is_in(crosswalk_zone)
+        return False
 
     def __repr__(self):
         return self._repr
@@ -103,6 +121,9 @@ class VehiclePart(RoadEntity):
     @property
     def facing(self):
         return self.relative_origin.facing
+    
+    def is_vehicle(self) -> bool:
+        return True
     
     def is_crossing(self) -> bool:
         return self.parent.is_crossing

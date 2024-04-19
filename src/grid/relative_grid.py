@@ -58,6 +58,12 @@ class RelativeGrid(Generic[T]):
             return ret
         return False
     
+    def get(self, displacement: RelativePosition) -> Optional[T]:
+        if not self.is_inbounds(displacement):
+            return None
+        row, col = displacement.apply(self._facing, self._center)
+        return self._grid.get_value(row, col)
+    
     def is_inbounds(self, displacement: RelativePosition = RelativePosition.still()) -> bool:
         row, col = displacement.apply(self._facing, self._center)
         if not self._bounds.is_inside((row, col)):

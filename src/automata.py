@@ -6,7 +6,7 @@ from rectangle import Rectangle
 from pedestrian.pedestrian import Pedestrian
 from pedestrian.waiting_area import WaitingArea
 from generator.tp_generator import TPGenerator
-from stoplight import StopLight
+from road_entity import RoadEntity
 from vehicle.turning_vehicle_lane import TurningVehicleLane
 from vehicle.straight_vehicle_lane import StraightVehicleLane
 from vehicle.vehicle_lane import VehicleLane
@@ -18,7 +18,7 @@ gen = TPGenerator(9*10**7)
 class Automata:
     def __init__(self):
         self._config = Config.new_from_env_file()
-        self._grid = Grid(self._config.total_rows, self._config.total_cols)
+        self._grid = Grid[RoadEntity](self._config.total_rows, self._config.total_cols)
         self._crosswalk_zone = Rectangle(self._config.crosswalk_prot.rows, self._config.crosswalk_prot.cols)
         self._crosswalk_zone.move_down(self._config.vehicle_prot.rows)
         self._crosswalk_zone.move_right(self._config.waiting_area_prot.cols)
@@ -28,6 +28,7 @@ class Automata:
 
         self._moved_entities = set()
         self._epoch = 0
+        self._conflicts = 0
         self._plotter = Plotter(self._grid, self._config)
 
     def build_waiting_areas(self):
@@ -86,15 +87,18 @@ class Automata:
         self._moved_entities.clear()
         self._epoch += 1
 
-    def move_object(self, object, _: Tuple[int, int]):
-        if object in self._moved_entities:
+    def move_object(self, entity: RoadEntity, _: Tuple[int, int]):
+        if entity in self._moved_entities:
             return
-        object.move(self._crosswalk_zone)
+        conflict_happened = entity.move(self._crosswalk_zone)
+        if conflict_happened:
+            self._conflicts += 1
 
-        self._moved_entities.add(object)
+        self._moved_entities.add(entity)
 
     def show(self):
         print(f"Epoch: {self._epoch}")
+        print(f"Conflicts: {self._conflicts}")
         self._config.pedestrian_stop_light.show()
         print("Waiting at East:", self._waiting_areas[0])
         print("Waiting at West:", self._waiting_areas[1])
