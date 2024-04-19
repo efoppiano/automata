@@ -55,7 +55,7 @@ class Automata:
             vehicle_lane_zone = self._config.vehicle_lane_prot.duplicate()
             vehicle_lane_zone.move_right(self._config.waiting_area_prot.cols + i*vehicle_lane_zone.cols)
             
-            if i < self._config.vehicle_lane_prot.cols//2:
+            if i < vehicle_lanes_amount//2:
                 facing = "South"
                 origin = vehicle_lane_zone.upper_right
             else:
