@@ -22,9 +22,9 @@ class Automata:
         self.build_waiting_areas()
         self.build_vehicle_lanes()
 
-        self._moved_entities = set()
         self._epoch = 0
         self._conflicts = 0
+        self._entities_with_conflicts = set()
         self._plotter = Plotter(self._grid, self._config)
 
     def build_waiting_areas(self):
@@ -80,23 +80,13 @@ class Automata:
         for vehicle_lane in self._vehicle_lanes:
             vehicle_lane.update()
         
-        self._moved_entities.clear()
         self._epoch += 1
 
     def move_object(self, entity: RoadEntity, _: Tuple[int, int]):
-        if entity in self._moved_entities:
-            return
         conflict_happened = entity.move(self._crosswalk_zone)
         if conflict_happened:
             self._conflicts += 1
-        """
-        if conflict_happened and not entity in self._entities_with_conflicts:
-            self._conflicts += 1
-            self._conflicts_per_epoch[-1] += 1
-            self._entities_with_conflicts.add(entity)
-        """
 
-        self._moved_entities.add(entity)
 
     def show(self):
         print(f"Epoch: {self._epoch}")

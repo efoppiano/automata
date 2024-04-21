@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Optional, Callable, Tuple
+from typing import TypeVar, Generic, Optional, Callable, Tuple, List
 
 from generator.tp_generator import choice
 from directions import Direction
@@ -160,12 +160,19 @@ class Grid(Generic[T]):
             return None
         return self.get_value(row + dist + 1, col)
     
+    def _get_cells_with_value(self) -> List[Tuple[Tuple[int, int], T]]:
+        values = []
+        for i in range(self.rows):
+            for j in range(self.cols):
+                if self.is_fill(i, j):
+                    values.append(((i, j), self.get_value(i, j)))
+        return values
+    
     def apply(self, f: Callable[[T, Tuple[int, int]], None]):
-        remaining_cells = [(i, j) for i in range(self.rows) for j in range(self.cols)]
+        values = self._get_cells_with_value()
 
-        while len(remaining_cells) > 0:
-            cell = choice(remaining_cells)
-            remaining_cells.remove(cell)
-            i, j = cell
-            if self.is_fill(i, j):
-                f(self.get_value(i, j), (i, j))
+        while len(values) > 0:
+            cell = choice(values)
+            values.remove(cell)
+            pos, value = cell
+            f(value, pos)
