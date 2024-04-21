@@ -36,7 +36,7 @@ class Config:
 
         vehicle_lane_cols = crosswalk_cols // vehicle_lanes
         crosswalk_prototype = Rectangle(crosswalk_rows, crosswalk_cols)
-        vehicle_lane_prototype = Rectangle(3*vehicle_rows+crosswalk_prototype.rows, vehicle_lane_cols)
+        vehicle_lane_prototype = Rectangle(2*vehicle_rows+crosswalk_prototype.rows, vehicle_lane_cols)
         waiting_area_prototype = Rectangle(crosswalk_rows, waiting_area_cols)
         vehicle_prototype = Rectangle(vehicle_rows, vehicle_cols)
 
