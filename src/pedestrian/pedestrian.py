@@ -52,45 +52,48 @@ class Pedestrian(RoadEntity):
             return 2
 
     def can_move_forward(self) -> bool:
-        dist_to_next =  self._rel_grid.calc_dist_to_next(still(), lambda ent: ent.is_crossing())
-        return dist_to_next is None or dist_to_next > 1
+        if not self._rel_grid.is_inbounds(forward(1)):
+            return True
+        
+        dist_to_next =  self._rel_grid.calc_dist_to_next(still(), lambda ent: ent.is_crossing() and\
+                                                         ent.facing == self.facing)
+        return dist_to_next is None or dist_to_next >= 1
+    
+    def can_do_lateral_movement(self, to_right: bool) -> bool:
+        displacement = right(1) if to_right else left(1)
+
+        if not self._rel_grid.is_fill(forward(1)):
+            return False
+        
+        if not self._rel_grid.is_inbounds(displacement):
+            return False
+        
+        if self._rel_grid.is_fill(displacement):
+            return False
+        
+        dist = self._rel_grid.calc_dist_to_next(displacement, lambda ent: ent.is_crossing() and\
+                                                ent.facing == opposite_direction(self.facing))
+        if dist is not None and dist <= self._vel:
+            return False
+        
+        dist_to_prev = self._rel_grid.calc_dist_to_prev(displacement, lambda ent: ent.is_crossing() and\
+                                                        ent.facing == self.facing)
+        if dist_to_prev is None:
+            return True
+        prev = self._rel_grid.get_prev(displacement, lambda ent: ent.is_crossing() and\
+                                       ent.facing == self.facing)
+        
+        return prev._vel < self._vel
     
     def can_move_left(self) -> bool:
-        if not self._rel_grid.is_inbounds(left(1)):
-            return False
-        
-        if self._rel_grid.is_fill(left(1), False):
-            return False
-        
-        prev = self._rel_grid.get_prev(left(1),
-                                       lambda obj: obj.facing == self.facing)
-        if prev is None or self.is_faster_than(prev):
-            return True
-        
-        dist_to_next = self._rel_grid.calc_dist_to_next(left(1))
-        return dist_to_next is None or dist_to_next > self._vel
+        return self.can_do_lateral_movement(False)
     
     def can_move_right(self) -> bool:
-        if not self._rel_grid.is_inbounds(right(1)):
-            return False
-        
-        if self._rel_grid.is_fill(right(1), False):
-            return False
-        
-        prev = self._rel_grid.get_prev(right(1),
-                                       lambda obj: obj.facing == self.facing)
-        if prev is None or self.is_faster_than(prev):
-            return True
-        
-        dist_to_next = self._rel_grid.calc_dist_to_next(right(1))
-        return dist_to_next is None or dist_to_next > self._vel
-    
-    def is_faster_than(self, other: 'Pedestrian') -> bool:
-        return self._vel > other._vel
-    
+        return self.can_do_lateral_movement(True)
+
     def _get_pos_forward(self) -> RelativePosition:
-        dist_to_next = self._rel_grid.calc_dist_to_next(still(),
-                                                        lambda obj: obj.facing != opposite_direction(self.facing))
+        dist_to_next = self._rel_grid.calc_dist_to_next(still(), lambda ent: ent.is_crossing() and\
+                                                        ent.facing == self.facing)
         if dist_to_next is None or dist_to_next > self._vel:
             return forward(self._vel)
         return forward(dist_to_next)
@@ -131,16 +134,18 @@ class Pedestrian(RoadEntity):
         if not self._rel_grid.is_inbounds(self._desired_displacement):
             self._rel_grid.clear()
             return False
-        conflict_happend = False
-        while not self._desired_displacement.is_still() and self._rel_grid.is_fill(self._desired_displacement, False):
-            entity = self._rel_grid.get(self._desired_displacement)
-            if entity.is_vehicle():
-                conflict_happend = True
-            self._desired_displacement.decrease()
-
-        self._rel_grid.move(self._desired_displacement)
-        if self._crossing and not self._rel_grid.is_in(crosswalk_zone):
+        if self._desired_displacement.is_still():
+            return False
+        self._crossing = True
+        if not self._rel_grid.new_displaced(self._desired_displacement).is_in(crosswalk_zone):
             self._rel_grid.clear()
-        if not self._crossing:
-            self._crossing = self._rel_grid.is_in(crosswalk_zone)
-        return conflict_happend
+            return False
+
+        while not self._desired_displacement.is_still() and self._rel_grid.is_fill(self._desired_displacement):
+            self._desired_displacement.decrease()
+        
+        if self._desired_displacement.is_still():
+            return False
+        
+        self._rel_grid.move(self._desired_displacement)
+        return False
