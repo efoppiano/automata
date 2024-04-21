@@ -26,7 +26,7 @@ class WaitingArea:
 
     def _can_place_pedestrian(self) -> bool:
         for i in range(self._rel_grid.rows):
-            if not self._rel_grid.is_fill(right(i), ignore_opposite_direction=False):
+            if not self._rel_grid.is_fill(right(i)):
                 return True
         return False
     
@@ -34,7 +34,7 @@ class WaitingArea:
         rows = self._rel_grid.rows
         
         possible_pos = randint(0, rows)
-        while self._rel_grid.is_fill(right(possible_pos), ignore_opposite_direction=False):
+        while self._rel_grid.is_fill(right(possible_pos)):
             possible_pos = (possible_pos + 1) % rows
 
         pedestrian_grid = self._rel_grid.new_displaced(right(possible_pos))
