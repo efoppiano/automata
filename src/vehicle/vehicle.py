@@ -11,7 +11,7 @@ from road_entity import RoadEntity
 class Vehicle(RoadEntity, ABC):
     def __init__(self, origin: RelativeGrid[RoadEntity], prototype: Rectangle):
         self._repr = choice(["🟥", "🟧", "🟨", "🟩", "🟦", "🟪", "🟫"])
-        self._vel = 5
+        self._vel = 10
         self._crossing = False
         self._desired_movement = still()
         self._width = prototype.cols
@@ -90,13 +90,12 @@ class Vehicle(RoadEntity, ABC):
             self.remove()
             return False
 
+        self._crossing = True
         self.driver_pos.move(self._desired_movement)
 
         for rel_grid_i in self.relative_origins:
             rel_grid_i.move(self._desired_movement)
 
-        if not self._crossing:
-            self._crossing = self.driver_pos.is_in(crosswalk_zone)
         return False
 
     def __repr__(self):
