@@ -6,12 +6,8 @@ from rectangle import Rectangle
 from vehicle.vehicle import Vehicle
 
 class TurningVehicle(Vehicle):
-    def think(self, crosswalk_zone: Rectangle, pedestrian_stop_light: StopLight):
-        if self._crossing or pedestrian_stop_light.is_green():
-            self._desired_movement = forward(self._vel)
+    def think(self, _crosswalk_zone: Rectangle, _pedestrian_stop_light: StopLight):
+        if self.is_pedestrian_ahead():
+            self._desired_movement = still()
         else:
-            dist = self.driver_pos.calc_dist_to_zone(still(), crosswalk_zone)
-            if dist is None:
-                self._desired_movement = forward(self._vel)
-            else:
-                self._desired_movement = forward(min(dist, self._vel))
+            self._desired_movement = forward(self._vel)
