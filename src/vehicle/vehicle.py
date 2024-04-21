@@ -55,19 +55,20 @@ class Vehicle(RoadEntity, ABC):
 
         return True
 
-    def is_pedestrian_ahead(self) -> bool:
+    def is_entity_ahead(self) -> bool:
         for i in range(self._width):
             entity = self.driver_pos.get_next(right(i))
-            if entity is not None and not entity.is_vehicle():
+            if entity is not None:
                 return True
         return False
     
-    def is_vehicle_ahead(self) -> bool:
+    def is_pedestrian_ahead(self) -> bool:
         for i in range(self._width):
             entity = self.driver_pos.get_next(right(i))
-            if entity is not None and entity.is_vehicle():
+            if entity is not None and entity.is_pedestrian():
                 return True
         return False
+    
 
     @abstractmethod
     def think(self, crosswalk_zone: Rectangle, pedestrian_stop_light: StopLight):
@@ -81,9 +82,6 @@ class Vehicle(RoadEntity, ABC):
             for rel_grid_i in self.relative_origins:
                 if rel_grid_i.new_displaced(self._desired_movement).is_in(crosswalk_zone):
                     return True
-            return False
-        
-        if self.is_vehicle_ahead():
             return False
 
         if not self.driver_pos.is_inbounds(self._desired_movement):

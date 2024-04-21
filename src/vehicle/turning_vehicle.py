@@ -7,7 +7,7 @@ from vehicle.vehicle import Vehicle
 
 class TurningVehicle(Vehicle):
     def think(self, _crosswalk_zone: Rectangle, _pedestrian_stop_light: StopLight):
-        if self.is_pedestrian_ahead():
+        if self.is_entity_ahead():
             self._desired_movement = still()
         else:
             self._desired_movement = forward(self._vel)
