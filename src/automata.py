@@ -24,7 +24,6 @@ class Automata:
 
         self._epoch = 0
         self._conflicts = 0
-        self._entities_with_conflicts = set()
         self._plotter = Plotter(self._grid, self._config)
 
     def build_waiting_areas(self):
