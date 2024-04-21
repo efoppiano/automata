@@ -20,3 +20,6 @@ class RoadEntity(Orientable, ABC):
     @abstractmethod
     def is_vehicle(self) -> bool:
         pass
+
+    def is_pedestrian(self) -> bool:
+        return not self.is_vehicle()
