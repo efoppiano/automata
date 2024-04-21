@@ -62,60 +62,60 @@ class RelativeGrid(Generic[T]):
 
         return 0 <= row < self._grid.rows and 0 <= col < self._grid.cols
 
-    def get_prev(self, displacement: RelativePosition, f: Callable[[T], bool] = None) -> Optional[T]:
+    def get_prev(self, displacement: RelativePosition, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[T]:
         if f is None:
             f = lambda _: True
 
         row, col = displacement.apply(self._facing, self._center)
         if self._facing == "East":
-            return self._grid.get_prev(row, col, f)
+            return self._grid.get_prev(row, col, f, max_checks)
         elif self._facing == "West":
-            return self._grid.get_next(row, col, f)
+            return self._grid.get_next(row, col, f, max_checks)
         elif self._facing == "North":
-            return self._grid.get_vertically_next(row, col, f)
+            return self._grid.get_vertically_next(row, col, f, max_checks)
         elif self._facing == "South":
-            return self._grid.get_vertically_prev(row, col, f)
+            return self._grid.get_vertically_prev(row, col, f, max_checks)
         
-    def get_next(self, displacement: RelativePosition, f: Callable[[T], bool] = None) -> Optional[T]:
+    def get_next(self, displacement: RelativePosition, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[T]:
         if f is None:
             f = lambda _: True
 
         row, col = displacement.apply(self._facing, self._center)
         if self._facing == "East":
-            return self._grid.get_next(row, col, f)
+            return self._grid.get_next(row, col, f, max_checks)
         elif self._facing == "West":
-            return self._grid.get_prev(row, col, f)
+            return self._grid.get_prev(row, col, f, max_checks)
         elif self._facing == "North":
-            return self._grid.get_vertically_prev(row, col, f)
+            return self._grid.get_vertically_prev(row, col, f, max_checks)
         elif self._facing == "South":
-            return self._grid.get_vertically_next(row, col, f)
+            return self._grid.get_vertically_next(row, col, f, max_checks)
         
         
-    def calc_dist_to_next(self, displacement: RelativePosition, f: Callable[[T], bool] = None) -> Optional[int]:
+    def calc_dist_to_next(self, displacement: RelativePosition, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[int]:
         if f is None:
             f = lambda _: True
         row, col = displacement.apply(self._facing, self._center)
         if self._facing == "East":
-            return self._grid.calc_dist_to_next(row, col, f)
+            return self._grid.calc_dist_to_next(row, col, f, max_checks)
         elif self._facing == "West":
-            return self._grid.calc_dist_to_prev(row, col, f)
+            return self._grid.calc_dist_to_prev(row, col, f, max_checks)
         elif self._facing == "North":
-            return self._grid.calc_dist_to_vertically_prev(row, col, f)
+            return self._grid.calc_dist_to_vertically_prev(row, col, f, max_checks)
         elif self._facing == "South":
-            return self._grid.calc_dist_to_vertically_next(row, col, f)
+            return self._grid.calc_dist_to_vertically_next(row, col, f, max_checks)
         
-    def calc_dist_to_prev(self, displacement: RelativePosition, f: Callable[[T], bool] = None) -> Optional[int]:
+    def calc_dist_to_prev(self, displacement: RelativePosition, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[int]:
         if f is None:
             f = lambda _: True
         row, col = displacement.apply(self._facing, self._center)
         if self._facing == "East":
-            return self._grid.calc_dist_to_prev(row, col, f)
+            return self._grid.calc_dist_to_prev(row, col, f, max_checks)
         elif self._facing == "West":
-            return self._grid.calc_dist_to_next(row, col, f)
+            return self._grid.calc_dist_to_next(row, col, f, max_checks)
         elif self._facing == "North":
-            return self._grid.calc_dist_to_vertically_next(row, col, f)
+            return self._grid.calc_dist_to_vertically_next(row, col, f, max_checks)
         elif self._facing == "South":
-            return self._grid.calc_dist_to_vertically_prev(row, col, f)
+            return self._grid.calc_dist_to_vertically_prev(row, col, f, max_checks)
         
     def calc_dist_to_zone(self, displacement: RelativePosition, zone: Rectangle) -> Optional[int]:
         row, col = displacement.apply(self._facing, self._center)

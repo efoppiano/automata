@@ -49,7 +49,7 @@ class Vehicle(RoadEntity, ABC):
 
     def can_move(self) -> bool:
         for i in range(self._width):
-            dist_to_next = self.driver_pos.calc_dist_to_next(right(i))
+            dist_to_next = self.driver_pos.calc_dist_to_next(right(i), max_checks=self._vel)
             if dist_to_next is not None and dist_to_next < self._vel:
                 return False
 
@@ -57,14 +57,14 @@ class Vehicle(RoadEntity, ABC):
 
     def is_entity_ahead(self) -> bool:
         for i in range(self._width):
-            entity = self.driver_pos.get_next(right(i))
+            entity = self.driver_pos.get_next(right(i), max_checks=self._vel)
             if entity is not None:
                 return True
         return False
     
     def is_pedestrian_ahead(self) -> bool:
         for i in range(self._width):
-            entity = self.driver_pos.get_next(right(i))
+            entity = self.driver_pos.get_next(right(i), max_checks=self._vel)
             if entity is not None and entity.is_pedestrian():
                 return True
         return False

@@ -56,7 +56,7 @@ class Pedestrian(RoadEntity):
             return True
         
         dist_to_next =  self._rel_grid.calc_dist_to_next(still(), lambda ent: ent.is_crossing() and\
-                                                         ent.facing == self.facing)
+                                                         ent.facing == self.facing, 1)
         return dist_to_next is None or dist_to_next >= 1
     
     def can_do_lateral_movement(self, to_right: bool) -> bool:
@@ -72,16 +72,16 @@ class Pedestrian(RoadEntity):
             return False
         
         dist = self._rel_grid.calc_dist_to_next(displacement, lambda ent: ent.is_crossing() and\
-                                                ent.facing == opposite_direction(self.facing))
-        if dist is not None and dist <= self._vel:
+                                                ent.facing == opposite_direction(self.facing), self._vel)
+        if dist is not None:
             return False
         
         dist_to_prev = self._rel_grid.calc_dist_to_prev(displacement, lambda ent: ent.is_crossing() and\
-                                                        ent.facing == self.facing)
+                                                        ent.facing == self.facing, 6)
         if dist_to_prev is None:
             return True
         prev = self._rel_grid.get_prev(displacement, lambda ent: ent.is_crossing() and\
-                                       ent.facing == self.facing)
+                                       ent.facing == self.facing, 6)
         
         return prev._vel < self._vel
     

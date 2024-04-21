@@ -33,8 +33,8 @@ class VehicleLane(ABC):
 
     def _can_place_vehicle(self) -> bool:
         for i in range(self._rel_grid.cols):
-            dist_to_next = self._rel_grid.calc_dist_to_next(right(i))
-            if dist_to_next is not None and dist_to_next < self._config.vehicle_prot.rows:
+            dist_to_next = self._rel_grid.calc_dist_to_next(right(i), max_checks=self._config.vehicle_prot.cols)
+            if dist_to_next is not None:
                 return False
         return True
 

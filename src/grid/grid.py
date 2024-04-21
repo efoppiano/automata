@@ -100,62 +100,75 @@ class Grid(Generic[T]):
     def cols(self):
         return len(self._grid[0])
 
-    def calc_dist_to_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
+    def calc_dist_to_next(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[int]:
         if f is None:
             f = lambda x: True
-
-        for i in range(col+1, self.cols):
+        max_checks = max_checks or self.cols - col
+        
+        for i in range(col+1, min(self.cols, col+max_checks+1)):
             if self.is_fill(row, i) and f(self.get_value(row, i)):
                 return i - col - 1
         return None
     
-    def calc_dist_to_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
+    def calc_dist_to_prev(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[int]:
         if f is None:
             f = lambda x: True
+        max_checks = max_checks or col
 
-        for i in range(col-1, -1, -1):
+        for i in range(col-1, max(-1, col-max_checks-1), -1):
             if self.is_fill(row, i) and f(self.get_value(row, i)):
                 return col - i - 1
         return None
     
-    def calc_dist_to_vertically_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
+    def calc_dist_to_vertically_next(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[int]:
         if f is None:
             f = lambda x: True
+        max_checks = max_checks or self.rows - row
 
-        for i in range(row+1, self.rows):
+        for i in range(row+1, min(self.rows, row+max_checks+1)):
             if self.is_fill(i, col) and f(self.get_value(i, col)):
                 return i - row - 1
         return None
     
-    def calc_dist_to_vertically_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
+    def calc_dist_to_vertically_prev(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[int]:
         if f is None:
             f = lambda x: True
+        max_checks = max_checks or row
 
-        for i in range(row-1, -1, -1):
+        for i in range(row-1, max(-1, row-max_checks-1), -1):
             if self.is_fill(i, col) and f(self.get_value(i, col)):
                 return row - i - 1
+            
         return None
     
-    def get_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
-        dist = self.calc_dist_to_prev(row, col, f)
+    def get_prev(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[T]:
+        max_checks = max_checks or col
+
+        dist = self.calc_dist_to_prev(row, col, f, max_checks)
         if dist is None:
             return None
         return self.get_value(row, col - dist - 1)
     
-    def get_vertically_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
-        dist = self.calc_dist_to_vertically_prev(row, col, f)
+    def get_vertically_prev(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[T]:
+        max_checks = max_checks or row
+
+        dist = self.calc_dist_to_vertically_prev(row, col, f, max_checks)
         if dist is None:
             return None
         return self.get_value(row - dist - 1, col)
     
-    def get_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
-        dist = self.calc_dist_to_next(row, col, f)
+    def get_next(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[T]:
+        max_checks = max_checks or self.cols - col
+
+        dist = self.calc_dist_to_next(row, col, f, max_checks)
         if dist is None:
             return None
         return self.get_value(row, col + dist + 1)
     
-    def get_vertically_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
-        dist = self.calc_dist_to_vertically_next(row, col, f)
+    def get_vertically_next(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[T]:
+        max_checks = max_checks or self.rows
+
+        dist = self.calc_dist_to_vertically_next(row, col, f, max_checks)
         if dist is None:
             return None
         return self.get_value(row + dist + 1, col)
