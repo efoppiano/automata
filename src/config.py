@@ -4,15 +4,15 @@ from dotenv import load_dotenv
 from rectangle import Rectangle
 from stoplight import StopLight
 
-DEFAULT_CROSSWALK_ROWS = 8
+DEFAULT_CROSSWALK_ROWS = 6
 DEFAULT_CROSSWALK_COLS = 42
 DEFAULT_WAITING_AREA_COLS = 1
 DEFAULT_VEHICLE_LANES = 6
 DEFAULT_VEHICLE_ROWS = 6
 DEFAULT_VEHICLE_COLS = 5
 DEFAULT_STOP_LIGHT_CYCLE = 90
-DEFAULT_GREEN_LIGHT_TIME = 20
-DEFAULT_PEDESTRIAN_ARRIVAL_RATE = 1000/3600
+DEFAULT_GREEN_LIGHT_TIME = 50
+DEFAULT_PEDESTRIAN_ARRIVAL_RATE = 500/3600
 DEFAULT_VEHICLE_ARRIVAL_RATE = 1400/(6*3600)
 
 
@@ -87,3 +87,12 @@ class Config:
         print(f"Total rows: {self.total_rows}")
         print(f"Total cols: {self.total_cols}")
         print(f"Walking zone prototype: {self.walking_zone_prot}")
+
+    def duplicate(self):
+        return Config(self.crosswalk_prot,
+                      self.vehicle_lane_prot,
+                      self.waiting_area_prot,
+                      self.vehicle_prot,
+                      self.pedestrian_stop_light,
+                      self.pedestrian_arrival_rate,
+                      self.vehicle_arrival_rate)

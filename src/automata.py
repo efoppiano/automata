@@ -12,8 +12,8 @@ from config import Config
 from plotter import Plotter
 
 class Automata:
-    def __init__(self):
-        self._config = Config.new_from_env_file()
+    def __init__(self, config: Config = None):
+        self._config = config or Config.new_from_env_file()
         self._grid = Grid[RoadEntity](self._config.total_rows, self._config.total_cols)
         self._crosswalk_zone = Rectangle(self._config.crosswalk_prot.rows, self._config.crosswalk_prot.cols)
         self._crosswalk_zone.move_down(self._config.vehicle_prot.rows)
