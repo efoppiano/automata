@@ -39,8 +39,8 @@ class Automata:
         grid_area_east = RelativeGrid(walking_zone.lower_right, walking_zone, "West", self._grid)
 
         self._waiting_areas: List[WaitingArea] = []
-        waiting_area_west = WaitingArea(1000/3600, grid_area_west)
-        waiting_area_east = WaitingArea(1000/3600, grid_area_east)
+        waiting_area_west = WaitingArea(self._config.pedestrian_arrival_rate, grid_area_west)
+        waiting_area_east = WaitingArea(self._config.pedestrian_arrival_rate, grid_area_east)
 
         self._waiting_areas.append(waiting_area_west)
         self._waiting_areas.append(waiting_area_east)
@@ -89,6 +89,12 @@ class Automata:
         conflict_happened = entity.move(self._crosswalk_zone)
         if conflict_happened:
             self._conflicts += 1
+        """
+        if conflict_happened and not entity in self._entities_with_conflicts:
+            self._conflicts += 1
+            self._conflicts_per_epoch[-1] += 1
+            self._entities_with_conflicts.add(entity)
+        """
 
         self._moved_entities.add(entity)
 
