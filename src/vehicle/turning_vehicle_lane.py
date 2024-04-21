@@ -11,5 +11,4 @@ from road_entity import RoadEntity
 
 class TurningVehicleLane(VehicleLane):
     def spawn_vehicle(self, vehicle_grid: RelativeGrid[RoadEntity], vehicle_prot: Rectangle):
-        # TurningVehicle(vehicle_grid, vehicle_prot)
-        StraightVehicle(vehicle_grid, vehicle_prot)
+        TurningVehicle(vehicle_grid, vehicle_prot)
