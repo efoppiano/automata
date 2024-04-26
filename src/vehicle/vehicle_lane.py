@@ -46,6 +46,7 @@ class VehicleLane(ABC):
 
         vehicle_grid = self._rel_grid.new_displaced(right(offset))
         self.spawn_vehicle(vehicle_grid, self._config.vehicle_prot)
+        self._waiting_vehicles -= 1
 
     def update(self):
         self._generate_vehicle()
