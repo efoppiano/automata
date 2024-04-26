@@ -1,5 +1,7 @@
+copy_env_file:
+	if [ ! -f .env ]; then cp .env.example .env; fi
 
-common:
+common: copy_env_file
 	mkdir -p results
 
 install_dependencies:
