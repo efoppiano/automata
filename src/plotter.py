@@ -11,7 +11,6 @@ class Plotter:
         self._bounds = Rectangle(self._config.crosswalk_prot.rows + self._config.vehicle_prot.rows,
                                  self._config.total_cols)
         self._bounds.move_down(self._config.vehicle_prot.rows)
-        print(f"Bounds: {self._bounds}")
         crosswalk_start_row = self._config.vehicle_prot.rows
         crosswalk_start_col = self._config.waiting_area_prot.cols
 

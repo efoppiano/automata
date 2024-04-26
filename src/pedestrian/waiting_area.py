@@ -1,9 +1,10 @@
-from pedestrian.pedestrian import Pedestrian
-from generator.tp_generator import TPGenerator
-from grid.relative_grid import RelativeGrid
-from relative_position import RelativePosition
+from typing import Optional
 
-gen = TPGenerator(2**10**7)
+from pedestrian.pedestrian import Pedestrian
+from generator.tp_generator import poi, randint
+from grid.relative_grid import RelativeGrid
+from relative_position import right
+from stoplight import StopLight
 
 
 class WaitingArea:
@@ -18,35 +19,38 @@ class WaitingArea:
         if self._waiting_pedestrians == self._max_size:
             return
         
-        new_pedestrians = min(self._max_size - self._waiting_pedestrians, gen.poi(self._arrival_rate))
+        new_pedestrians = min(self._max_size - self._waiting_pedestrians, poi(self._arrival_rate))
         self._waiting_pedestrians += new_pedestrians
         self._total_generated_pedestrians += new_pedestrians
 
 
     def _can_place_pedestrian(self) -> bool:
         for i in range(self._rel_grid.rows):
-            if not self._rel_grid.is_fill(RelativePosition.right(i), ignore_opposite_direction=False):
+            if not self._rel_grid.is_fill(right(i)):
                 return True
         return False
     
     def _place_pedestrian(self):
         rows = self._rel_grid.rows
         
-        possible_pos = gen.randint(0, rows)
-        while self._rel_grid.is_fill(RelativePosition.right(possible_pos), ignore_opposite_direction=False):
+        possible_pos = randint(0, rows)
+        while self._rel_grid.is_fill(right(possible_pos)):
             possible_pos = (possible_pos + 1) % rows
 
-        pedestrian_grid = self._rel_grid.new_displaced(RelativePosition.right(possible_pos))
-        self._rel_grid.fill(RelativePosition.right(possible_pos), Pedestrian(pedestrian_grid))
+        pedestrian_grid = self._rel_grid.new_displaced(right(possible_pos))
+        self._rel_grid.fill(right(possible_pos), Pedestrian(pedestrian_grid))
+
         self._waiting_pedestrians -= 1
     
     def _place_pedestrians(self):
         while self._waiting_pedestrians > 0 and self._can_place_pedestrian():
             self._place_pedestrian()
 
-    def update(self):
+    def update(self, pedestrian_stop_light: Optional[StopLight] = None):
         self._generate_pedestrians()
-        self._place_pedestrians()
+        if pedestrian_stop_light is None or pedestrian_stop_light.is_green():
+            self._place_pedestrians()
+            
             
 
     def __repr__(self) -> str:

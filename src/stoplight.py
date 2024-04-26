@@ -50,6 +50,15 @@ class StopLight:
     
     def is_yellow(self) -> bool:
         return self._state == "yellow"
+    
+    def prev_state_is_green(self) -> bool:
+        return self._prev_state == "green"
+    
+    def prev_state_is_red(self) -> bool:
+        return self._prev_state == "red"
+    
+    def prev_state_is_yellow(self) -> bool:
+        return self._prev_state == "yellow"
 
     def show(self):
         if self._state == "green":

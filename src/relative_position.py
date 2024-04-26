@@ -57,3 +57,18 @@ class RelativePosition:
             return center[0] + self._forward, center[1] - self._right
         else:
             raise Exception(f"Invalid direction {facing}")
+        
+def forward(amount: int) -> RelativePosition:
+    return RelativePosition.forward(amount)
+
+def backward(amount: int) -> RelativePosition:
+    return RelativePosition.backward(amount)
+
+def right(amount: int) -> RelativePosition:
+    return RelativePosition.right(amount)
+
+def left(amount: int) -> RelativePosition:
+    return RelativePosition.left(amount)
+
+def still() -> RelativePosition:
+    return RelativePosition.still()

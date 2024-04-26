@@ -1,15 +1,7 @@
-from typing import TypeVar, Generic, Optional, Callable, Tuple
+from typing import TypeVar, Generic, Optional, Callable, Tuple, List
 
-from generator.tp_generator import TPGenerator
-from directions import Direction
+from generator.tp_generator import choice
 from rectangle import Point, Rectangle
-
-gen = TPGenerator(4*10**7)
-
-CROSSWALK_START_ROW = 6
-CROSSWALK_END_ROW = CROSSWALK_START_ROW+8
-
-END_ROW = 19
 
 class CellAlreadyFill(Exception):
     def __init__(self, row: int, col: int, v = None):
@@ -25,23 +17,14 @@ T = TypeVar("T")
 class Grid(Generic[T]):
     def __init__(self, rows: int, cols: int):
         self._grid = [[None for i in range(cols)] for j in range(rows)]
-        self._passed_to_west = 0
-        self._passed_to_east = 0
 
     def is_fill(self, row: int, col: int) -> bool:
         if row < 0 or row >= self.rows:
-            raise Exception(f"Row {row} out of bounds")
+            return False
         if col < 0 or col >= self.cols:
             return False
         
         return self._grid[row][col] is not None
-    
-    # Testing only: Grid should not be aware of directions
-    def pedestrian_passed(self, grid_direction: Direction):
-        if grid_direction == "East":
-            self._passed_to_east += 1
-        elif grid_direction == "West":
-            self._passed_to_west += 1
 
     def _plot_col_numbers(self, bounds: Rectangle):
         print("  ", end="")
@@ -107,72 +90,92 @@ class Grid(Generic[T]):
     def cols(self):
         return len(self._grid[0])
 
-    def calc_dist_to_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
+    def calc_dist_to_next(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[int]:
         if f is None:
             f = lambda x: True
-
-        for i in range(col+1, self.cols):
+        max_checks = max_checks or self.cols - col
+        
+        for i in range(col+1, min(self.cols, col+max_checks+1)):
             if self.is_fill(row, i) and f(self.get_value(row, i)):
                 return i - col - 1
         return None
     
-    def calc_dist_to_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
+    def calc_dist_to_prev(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[int]:
         if f is None:
             f = lambda x: True
+        max_checks = max_checks or col
 
-        for i in range(col-1, -1, -1):
+        for i in range(col-1, max(-1, col-max_checks-1), -1):
             if self.is_fill(row, i) and f(self.get_value(row, i)):
                 return col - i - 1
         return None
     
-    def calc_dist_to_vertically_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
+    def calc_dist_to_vertically_next(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[int]:
         if f is None:
             f = lambda x: True
+        max_checks = max_checks or self.rows - row
 
-        for i in range(row+1, self.rows):
+        for i in range(row+1, min(self.rows, row+max_checks+1)):
             if self.is_fill(i, col) and f(self.get_value(i, col)):
                 return i - row - 1
         return None
     
-    def calc_dist_to_vertically_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[int]:
+    def calc_dist_to_vertically_prev(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[int]:
         if f is None:
             f = lambda x: True
+        max_checks = max_checks or row
 
-        for i in range(row-1, -1, -1):
+        for i in range(row-1, max(-1, row-max_checks-1), -1):
             if self.is_fill(i, col) and f(self.get_value(i, col)):
                 return row - i - 1
+            
         return None
     
-    def get_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
-        dist = self.calc_dist_to_prev(row, col, f)
+    def get_prev(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[T]:
+        max_checks = max_checks or col
+
+        dist = self.calc_dist_to_prev(row, col, f, max_checks)
         if dist is None:
             return None
         return self.get_value(row, col - dist - 1)
     
-    def get_vertically_prev(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
-        dist = self.calc_dist_to_vertically_prev(row, col, f)
+    def get_vertically_prev(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[T]:
+        max_checks = max_checks or row
+
+        dist = self.calc_dist_to_vertically_prev(row, col, f, max_checks)
         if dist is None:
             return None
         return self.get_value(row - dist - 1, col)
     
-    def get_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
-        dist = self.calc_dist_to_next(row, col, f)
+    def get_next(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[T]:
+        max_checks = max_checks or self.cols - col
+
+        dist = self.calc_dist_to_next(row, col, f, max_checks)
         if dist is None:
             return None
         return self.get_value(row, col + dist + 1)
     
-    def get_vertically_next(self, row: int, col: int, f: Callable[[T], bool] = None) -> Optional[T]:
-        dist = self.calc_dist_to_vertically_next(row, col, f)
+    def get_vertically_next(self, row: int, col: int, f: Callable[[T], bool] = None, max_checks: int = None) -> Optional[T]:
+        max_checks = max_checks or self.rows
+
+        dist = self.calc_dist_to_vertically_next(row, col, f, max_checks)
         if dist is None:
             return None
         return self.get_value(row + dist + 1, col)
     
+    def _get_cells_with_value(self) -> List[Tuple[Tuple[int, int], T]]:
+        values = []
+        for i in range(self.rows):
+            for j in range(self.cols):
+                if self.is_fill(i, j):
+                    values.append(((i, j), self.get_value(i, j)))
+        return values
+    
     def apply(self, f: Callable[[T, Tuple[int, int]], None]):
-        remaining_cells = [(i, j) for i in range(self.rows) for j in range(self.cols)]
+        values = self._get_cells_with_value()
 
-        while len(remaining_cells) > 0:
-            cell = gen.choice(remaining_cells)
-            remaining_cells.remove(cell)
-            i, j = cell
-            if self.is_fill(i, j):
-                f(self.get_value(i, j), (i, j))
+        while len(values) > 0:
+            cell = choice(values)
+            values.remove(cell)
+            pos, value = cell
+            f(value, pos)
