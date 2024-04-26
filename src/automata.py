@@ -61,10 +61,7 @@ class Automata:
                 origin = vehicle_lane_zone.lower_left
             
             grid = RelativeGrid(origin, vehicle_lane_zone, facing, self._grid)
-            if i == 0 or i == vehicle_lanes_amount - 1:
-                vehicle_lane = TurningVehicleLane(self._config, grid)
-            else:
-                vehicle_lane = StraightVehicleLane(self._config, grid)
+            vehicle_lane = StraightVehicleLane(self._config, grid)
             self._vehicle_lanes.append(vehicle_lane)
 
     def update(self):
