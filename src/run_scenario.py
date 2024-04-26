@@ -10,17 +10,17 @@ import os
 
 load_dotenv()
 
-INITIAL_PEDESTRIAN_ARRIVAL_RATE_HR = os.environ.get("pedestrian_arrival_rate", 1000)
-FINAL_PEDESTRIAN_ARRIVAL_RATE_HR = os.environ.get("pedestrian_arrival_rate", 6000)
-INITIAL_VEHICLE_ARRIVAL_RATE_HR = os.environ.get("vehicle_arrival_rate", 200)
-FINAL_VEHICLE_ARRIVAL_RATE_HR = os.environ.get("vehicle_arrival_rate", 1400)
+INITIAL_PEDESTRIAN_ARRIVAL_RATE_HR = os.environ.get("PEDESTRIAN_ARRIVAL_RATE", 1000)
+FINAL_PEDESTRIAN_ARRIVAL_RATE_HR = os.environ.get("PEDESTRIAN_ARRIVAL_RATE", 6000)
+INITIAL_VEHICLE_ARRIVAL_RATE_HR = os.environ.get("VEHICLE_ARRIVAL_RATE", 200)
+FINAL_VEHICLE_ARRIVAL_RATE_HR = os.environ.get("VEHICLE_ARRIVAL_RATE", 1400)
 # Amount of times each scenario will be run
 # The average of the conflicts will be taken as the final result
 # The original paper runs 30 times each scenario, but for this
 # python implementation, that would take a long time
-RUNS_PER_SCENARIO = os.environ.get("runs_per_scenario", 3)
+RUNS_PER_SCENARIO = os.environ.get("RUNS_PER_SCENARIO", 3)
 # Data is recorded every 3600 time steps
-SIMULATION_TIME = os.environ.get("simulation_time", 3600)
+SIMULATION_TIME = os.environ.get("SIMULATION_TIME", 3600)
 
 # The simulation will run for 30 different pedestrian and vehicle arrival rates,
 # making a total of 900 scenarios
