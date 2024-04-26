@@ -1,7 +1,6 @@
 from typing import TypeVar, Generic, Optional, Callable, Tuple, List
 
 from generator.tp_generator import choice
-from directions import Direction
 from rectangle import Point, Rectangle
 
 class CellAlreadyFill(Exception):
@@ -18,23 +17,14 @@ T = TypeVar("T")
 class Grid(Generic[T]):
     def __init__(self, rows: int, cols: int):
         self._grid = [[None for i in range(cols)] for j in range(rows)]
-        self._passed_to_west = 0
-        self._passed_to_east = 0
 
     def is_fill(self, row: int, col: int) -> bool:
         if row < 0 or row >= self.rows:
-            raise Exception(f"Row {row} out of bounds")
+            return False
         if col < 0 or col >= self.cols:
             return False
         
         return self._grid[row][col] is not None
-    
-    # Testing only: Grid should not be aware of directions
-    def pedestrian_passed(self, grid_direction: Direction):
-        if grid_direction == "East":
-            self._passed_to_east += 1
-        elif grid_direction == "West":
-            self._passed_to_west += 1
 
     def _plot_col_numbers(self, bounds: Rectangle):
         print("  ", end="")
