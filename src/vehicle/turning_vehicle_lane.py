@@ -3,7 +3,6 @@ from grid.relative_grid import RelativeGrid
 
 from vehicle.vehicle_lane import VehicleLane
 from vehicle.turning_vehicle import TurningVehicle
-from vehicle.straight_vehicle import StraightVehicle
 
 from rectangle import Rectangle
 

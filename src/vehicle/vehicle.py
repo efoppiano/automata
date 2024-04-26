@@ -50,7 +50,7 @@ class Vehicle(RoadEntity, ABC):
     def can_move(self) -> bool:
         for i in range(self._width):
             dist_to_next = self.driver_pos.calc_dist_to_next(right(i), max_checks=self._vel)
-            if dist_to_next is not None and dist_to_next < self._vel:
+            if dist_to_next is not None:
                 return False
 
         return True
