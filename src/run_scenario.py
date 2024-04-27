@@ -10,17 +10,19 @@ import os
 
 load_dotenv()
 
-INITIAL_PEDESTRIAN_ARRIVAL_RATE_HR = os.environ.get("pedestrian_arrival_rate", 1000)
-FINAL_PEDESTRIAN_ARRIVAL_RATE_HR = os.environ.get("pedestrian_arrival_rate", 6000)
-INITIAL_VEHICLE_ARRIVAL_RATE_HR = os.environ.get("vehicle_arrival_rate", 200)
-FINAL_VEHICLE_ARRIVAL_RATE_HR = os.environ.get("vehicle_arrival_rate", 1400)
+INITIAL_PEDESTRIAN_ARRIVAL_RATE_HR = int(os.environ.get("PEDESTRIAN_ARRIVAL_RATE", 1000))
+FINAL_PEDESTRIAN_ARRIVAL_RATE_HR = int(os.environ.get("PEDESTRIAN_ARRIVAL_RATE", 6000))
+INITIAL_VEHICLE_ARRIVAL_RATE_HR = int(os.environ.get("VEHICLE_ARRIVAL_RATE", 200))
+FINAL_VEHICLE_ARRIVAL_RATE_HR = int(os.environ.get("VEHICLE_ARRIVAL_RATE", 1400))
 # Amount of times each scenario will be run
 # The average of the conflicts will be taken as the final result
 # The original paper runs 30 times each scenario, but for this
 # python implementation, that would take a long time
-RUNS_PER_SCENARIO = os.environ.get("runs_per_scenario", 3)
+RUNS_PER_SCENARIO = int(os.environ.get("RUNS_PER_SCENARIO", 3))
 # Data is recorded every 3600 time steps
-SIMULATION_TIME = os.environ.get("simulation_time", 3600)
+SIMULATION_TIME = int(os.environ.get("SIMULATION_TIME", 3600))
+
+N_PROCESSES = None if "N_PROCESSES" not in os.environ else int(os.environ["N_PROCESSES"])
 
 # The simulation will run for 30 different pedestrian and vehicle arrival rates,
 # making a total of 900 scenarios
@@ -37,13 +39,17 @@ def print_simulation_config():
     print(f"Simulation time: {SIMULATION_TIME} steps")
     print(f"Green light time: {os.environ['GREEN_LIGHT_TIME']} seconds")
     print(f"Crosswalk width: {float(os.environ['CROSSWALK_ROWS']) / 2: .1f} meters")
+    print(f"Number of processes: {N_PROCESSES}")
 
 def run(i: int, config: Config) -> Tuple[float, float, float]:    
     print(f"Starting automata...")
     start = time.time()
     results = []
     for j in range(RUNS_PER_SCENARIO):
-        set_seed(9*10**6 + i*10 + j)
+        # Since we are running the scenarios in different processes, each one
+        # will have a different generator, and no race conditions will happen
+        # while accessing the generator
+        set_seed(9*10**6 + i*RUNS_PER_SCENARIO + j)
         automata = Automata(config)
         automata.advance_to(SIMULATION_TIME)
         results.append(automata._conflicts)
@@ -65,13 +71,17 @@ def build_configs() -> List[Config]:
     return configs
 
 def run_parallel(configs: List[Config]) -> List[Tuple[float, float, float]]:
-    with Pool() as p:
+    with Pool(N_PROCESSES) as p:
        results = p.starmap(run, zip(range(len(configs)), configs))
     return results
 
 def save_results(results: List[Tuple[float, float, float]]):
-    t = time.localtime()
-    file_name = f"{t.tm_year}-{t.tm_mon}-{t.tm_mday}-{t.tm_hour}-{t.tm_min}-{t.tm_sec}.csv"
+    if "RESULTS_FILE_NAME" in os.environ:
+        file_name = os.environ["RESULTS_FILE_NAME"]
+    else:
+        t = time.localtime()
+        file_name = f"{t.tm_year}-{t.tm_mon}-{t.tm_mday}-{t.tm_hour}-{t.tm_min}-{t.tm_sec}.csv"
+        
     with open(f"results/{file_name}", "w") as f:
         f.write("pedestrian_arrival_rate,vehicle_arrival_rate,conflicts\n")
         for r in results:
