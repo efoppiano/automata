@@ -11,9 +11,9 @@ animation: common
 	python3 src/main.py
 
 scenario_1: common
-	GREEN_LIGHT_TIME=50 CROSSWALK_ROWS=6 RESULTS_FILE_NAME=scenario_1.csv \
+	GREEN_LIGHT_TIME=45 CROSSWALK_ROWS=6 RESULTS_FILE_NAME=scenario_1.csv \
 	python3 src/run_scenario.py
 
 scenario_2: common
-	GREEN_LIGHT_TIME=35 CROSSWALK_ROWS=10 RESULTS_FILE_NAME=scenario_2.csv \
+	GREEN_LIGHT_TIME=30 CROSSWALK_ROWS=10 RESULTS_FILE_NAME=scenario_2.csv \
 	python3 src/run_scenario.py
