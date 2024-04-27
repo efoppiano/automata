@@ -106,7 +106,7 @@ class Pedestrian(RoadEntity):
             return right(1)
 
     def think(self, crosswalk_zone: Rectangle, pedestrian_stop_light: StopLight):
-        if pedestrian_stop_light.is_yellow():
+        if pedestrian_stop_light.is_yellow() and pedestrian_stop_light.prev_state_is_green():
             if not self._crossing:
                 self._desired_displacement = RelativePosition.still()
             else:
