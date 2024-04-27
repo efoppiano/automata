@@ -20,6 +20,8 @@ variables used in the [config.py](src/config.py) and [run_scenario.py](src/run_s
 
 Aditionally, an animation of one of the scenarios can be run.
 
+![Animation](resources/animation.gif)
+
 ## Requirements
 
 - Python 3.11 or higher
