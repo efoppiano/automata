@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is a python implementation of the cellular automata model described
+This is a Python implementation of the cellular automata model described
 in the paper [Li, Xiaomeng & li, Xingang & Wang, Jiangfeng. (2012). Using Cellular Automata to Investigate Pedestrian Conflicts
 with Vehicles in Crosswalk at Signalized Intersection. Discrete Dynamics in Nature and Society. 2012.
 10.1155/2012/287502.](https://www.hindawi.com/journals/ddns/2012/287502/)
@@ -16,7 +16,7 @@ Two scenarios have been implemented:
   - 5 meters of crosswalk width
 
 More scenarios can be implemented by setting the environment
-variables used in the [config.py](src/config.py) and [run_scenario.py](src/run_scenario.py) file.
+variables used in the [config.py](src/config.py) and [run_scenario.py](src/run_scenario.py) files.
 
 Aditionally, an animation of one of the scenarios can be run.
 
