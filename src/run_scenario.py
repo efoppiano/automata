@@ -49,7 +49,7 @@ def run(i: int, config: Config) -> Tuple[float, float, float]:
         # Since we are running the scenarios in different processes, each one
         # will have a different generator, and no race conditions will happen
         # while accessing the generator
-        set_seed(9*10**6 + i*10 + j)
+        set_seed(9*10**6 + i*RUNS_PER_SCENARIO + j)
         automata = Automata(config)
         automata.advance_to(SIMULATION_TIME)
         results.append(automata._conflicts)
