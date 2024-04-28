@@ -109,10 +109,10 @@ class Pedestrian(RoadEntity):
         if pedestrian_stop_light.is_yellow() and pedestrian_stop_light.prev_state_is_green():
             if not self._crossing:
                 self._desired_displacement = RelativePosition.still()
+                return
             else:
                 self._vel = 6
                 self._repr = "😰"
-            return
         
         if pedestrian_stop_light.is_red():
             if not self._rel_grid.is_in(crosswalk_zone):
@@ -137,7 +137,6 @@ class Pedestrian(RoadEntity):
             else:
                 self._desired_displacement = still()
 
-    # Return True if a conflict is encountered between the pedestrian and a vehicle
     def move(self, crosswalk_zone: Rectangle) -> bool:
         if not self._rel_grid.is_inbounds(self._desired_displacement):
             self._rel_grid.clear()
