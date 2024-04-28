@@ -12,7 +12,7 @@ from config import Config
 from plotter import Plotter
 
 class Automata:
-    def __init__(self, config: Config = None):
+    def __init__(self, config: Config = None, animate: bool = False):
         self._config = config or Config.new_from_env_file()
         self._grid = Grid[RoadEntity](self._config.total_rows, self._config.total_cols)
         self._crosswalk_zone = Rectangle(self._config.crosswalk_prot.rows, self._config.crosswalk_prot.cols)
@@ -24,7 +24,8 @@ class Automata:
 
         self._epoch = 0
         self._conflicts = 0
-        self._plotter = Plotter(self._grid, self._config)
+        self._plotter = Plotter(self._grid, self._config, animate)
+        self._animate = animate
 
     def build_waiting_areas(self):
         if self._config.waiting_area_prot.cols > 0:
@@ -76,6 +77,9 @@ class Automata:
         for vehicle_lane in self._vehicle_lanes:
             vehicle_lane.update()
         
+        if self._animate:
+            self._plotter.add_frame()
+
         self._epoch += 1
 
     def move_object(self, entity: RoadEntity, _: Tuple[int, int]):
@@ -97,3 +101,6 @@ class Automata:
         while self._epoch < epoch:
             self.update()
 
+    def save_mp4(self, filename: str):
+        assert self._animate, "Cannot save mp4 if animation is disabled"
+        self._plotter.save_mp4(filename)

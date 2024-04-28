@@ -1,3 +1,9 @@
+from typing import List
+import matplotlib.pyplot as plt
+from matplotlib.image import AxesImage
+
+from images import faces, place_image
+
 from directions import Direction
 from grid.relative_grid import RelativeGrid
 from generator.tp_generator import random, choice
@@ -22,7 +28,7 @@ class Pedestrian(RoadEntity):
         if repr is not None:
             self._repr = repr
         else:
-            self._repr = choice(["😀", "😁", "🙃", "🤔", "😶", "🙄", "😎"])
+            self._repr = choice(["😀", "😁", "🤔", "😶", "🙄", "😎", "😐"])
 
     @property
     def facing(self) -> Direction:
@@ -112,7 +118,7 @@ class Pedestrian(RoadEntity):
                 return
             else:
                 self._vel = 6
-                self._repr = "😰"            
+                self._repr = "😰"
     
         if self.can_move_forward():
             self._desired_displacement = self._get_pos_forward()
@@ -149,3 +155,7 @@ class Pedestrian(RoadEntity):
         
         self._rel_grid.move(self._desired_displacement)
         return False
+    
+    def plot_in_ax(self, ax: plt.Axes) -> List[AxesImage]:
+        img = place_image(ax, faces[self._repr], self._rel_grid._center[1], self._rel_grid._center[0])
+        return [img]

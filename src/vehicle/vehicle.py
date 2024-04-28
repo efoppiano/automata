@@ -1,3 +1,7 @@
+import matplotlib.pyplot as plt
+from matplotlib.image import AxesImage
+
+from images import place_image, squares
 from typing import List
 from abc import ABC, abstractmethod
 
@@ -104,6 +108,9 @@ class Vehicle(RoadEntity, ABC):
         for rel_grid_i in self.relative_origins:
             rel_grid_i.clear()
 
+    def plot_in_ax(self, ax: plt.Axes) -> List[AxesImage]:
+        return [place_image(ax, squares[self._repr], self.driver_pos._center[1], self.driver_pos._center[0])]
+
 
 class VehiclePart(RoadEntity):
     def __init__(self, parent: Vehicle, relative_origin: RelativeGrid[RoadEntity], repr: str):
@@ -133,3 +140,6 @@ class VehiclePart(RoadEntity):
 
     def remove(self):
         pass
+
+    def plot_in_ax(self, ax: plt.Axes) -> List[AxesImage]:
+        return [place_image(ax, squares[self._repr], self.relative_origin._center[1], self.relative_origin._center[0])]

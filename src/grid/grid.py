@@ -179,3 +179,9 @@ class Grid(Generic[T]):
             values.remove(cell)
             pos, value = cell
             f(value, pos)
+
+    def apply_ordered(self, bounds: Rectangle, f: Callable[[T, Tuple[int, int]], None]):
+        for i in range(bounds.start_row, bounds.end_row+1):
+            for j in range(bounds.start_col, bounds.end_col+1):
+                if self.is_fill(i, j):
+                    f(self.get_value(i, j), (i, j))
