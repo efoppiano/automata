@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+import matplotlib.pyplot as plt
+from matplotlib.image import AxesImage
+from typing import List
 
 from orientable import Orientable
 from rectangle import Rectangle
@@ -23,3 +26,7 @@ class RoadEntity(Orientable, ABC):
 
     def is_pedestrian(self) -> bool:
         return not self.is_vehicle()
+    
+    @abstractmethod
+    def plot_in_ax(self, ax: plt.Axes) -> List[AxesImage]:
+        pass

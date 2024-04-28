@@ -8,6 +8,7 @@ install_dependencies:
 	pip3 install -r requirements.txt
 
 animation: common
+	GREEN_LIGHT_TIME=50 CROSSWALK_ROWS=6 \
 	python3 src/main.py
 
 scenario_1: common
