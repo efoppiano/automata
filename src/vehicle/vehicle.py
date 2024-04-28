@@ -109,7 +109,6 @@ class Vehicle(RoadEntity, ABC):
             rel_grid_i.clear()
 
     def plot_in_ax(self, ax: plt.Axes) -> List[AxesImage]:
-        # FIXME
         return [place_image(ax, squares[self._repr], self.driver_pos._center[1], self.driver_pos._center[0])]
 
 
